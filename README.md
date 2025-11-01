@@ -6,7 +6,9 @@ A Weather Widget for Conky using [wttr.in](https://github.com/chubin/wttr.in) fo
 
 The Charts show the baseline Temperature in light blue with an randomly estimated error rate, filled in a darker blue. The orange line indicates the chance of precipitation and the single darker blue line the humidity. The vertical red line shows the current time. 
 
-The Radar Image is shown as an animation of the Images from the last 60 minutes
+The Radar Image is shown as an animation of the Images from the last 60 minutes.
+
+Icons are based on [OpenWeatherMap Icons](https://github.com/rodrigokamada/openweathermap)
 
 ## Setup Weather Data
 
@@ -41,3 +43,7 @@ And these Files:
 
     ./weatherinfo.txt
     ./last_update.txt
+
+## Changing the Colors
+
+You can use the `./icons/owm-icons-blue/convert_color.sh`, `./icons/owm-icons-blue/convert_color.sh` and `./icons/arrow/rotate_img.sh` scripts to bulk edit the icon colors. Then edit the `./weather.conky` and `.lua` files in `./lua/`
