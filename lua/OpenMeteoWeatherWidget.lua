@@ -25,7 +25,7 @@ function getImage(imagePath)
     end
 end
 
-function add_8_hours_forecast(hourly_tempC,hourly_perticipprob,hourly_humidity)
+function add_24_hours_forecast(hourly_tempC,hourly_perticipprob,hourly_humidity)
 
     local chart = Chart:new({
         x_offset = 25,
@@ -33,15 +33,13 @@ function add_8_hours_forecast(hourly_tempC,hourly_perticipprob,hourly_humidity)
         x_size = 350,
         y_size = 50,
         border_type = "plot-both",
-        show_time_indicator = true
+        show_time_indicator = false
     })
 
     chart.lines = {}
     local border_probs = chart:get_properties("#3B5969FF")
     -- Add border lines
     chart:add_borders(border_probs)
-
-    
 
     local minmax = { min = 0, max = 100 }
     local scaling = chart:get_scaling(minmax, #hourly_perticipprob, 10)
@@ -53,13 +51,13 @@ function add_8_hours_forecast(hourly_tempC,hourly_perticipprob,hourly_humidity)
         color = "#3B596988", thickness = 1, antialiasing = false,
         series_type = "polygon", fill = true, fill_color = "#3B596940"
     }
-    local err = { initial_error = 0.5, absolute_error = 0, per_cent_error = 0.01, props = polyprops }
+    local err = { initial_error = 0.75, absolute_error = 0.01, per_cent_error = 0.00025, props = polyprops }
     forecast1_minmax = chart:add_scaled_series_with_error(hourly_tempC, chart:get_properties("#75A5CDFF"), err)
     
     table.insert(my_charts,chart)
 end
 
-function add_2_days_forecast(hourly_tempC,hourly_perticipprob,hourly_humidity)
+function add_7_days_forecast(hourly_tempC,hourly_perticipprob,hourly_humidity)
 
     local chart = Chart:new({
         x_offset = 25,
@@ -74,8 +72,6 @@ function add_2_days_forecast(hourly_tempC,hourly_perticipprob,hourly_humidity)
     -- Add border lines
     chart:add_borders(border_probs)
 
-    
-
     local minmax = { min = 0, max = 100 }
     local scaling = chart:get_scaling(minmax, #hourly_perticipprob, 10)
     chart:add_scaled_series(hourly_humidity, chart:get_properties("#3B596988"), scaling)
@@ -86,7 +82,7 @@ function add_2_days_forecast(hourly_tempC,hourly_perticipprob,hourly_humidity)
         color = "#3B596988", thickness = 1, antialiasing = false,
         series_type = "polygon", fill = true, fill_color = "#3B596940"
     }
-    local err = { initial_error = 1.5, absolute_error = 0.02, per_cent_error = 0.02, props = polyprops }
+    local err = { initial_error = 1.0, absolute_error = 0.02, per_cent_error = 0.0005, props = polyprops }
     forecast2_minmax = chart:add_scaled_series_with_error(hourly_tempC, chart:get_properties("#75A5CDFF"), err)
     
     table.insert(my_charts,chart)
@@ -124,7 +120,7 @@ function draw_radar_image(cr,x,y,width,height)
         local target_y = %YOUR_HOME_Y% + y
         local target2_x = 71 + x
         local target2_y = 71 + y
-        -- draw target indicator at 222 / 322 of the image
+        -- draw target indicator at YOUR_HOME_X / YOUR_HOME_Y of the image
         local lineProps = Utils.getLineProps("#BB596988")
         Utils.drawBox(cr,target_x-8,target_y-8,15,15,lineProps)
         
@@ -133,7 +129,7 @@ function draw_radar_image(cr,x,y,width,height)
         Utils.drawLine(cr,target_x+5,target_y,9,0,lineProps)
         Utils.drawLine(cr,target_x-5,target_y,-9,0,lineProps)
         
-        -- draw detail indicator at 222 / 322 of the image
+        -- draw detail indicator at YOUR_HOME_X / YOUR_HOME_Y of the image
         local lineProps2 = Utils.getLineProps("#BB596930")
         Utils.drawBox(cr,target2_x-15,target2_y-15,29,29,lineProps2)
         
@@ -143,7 +139,7 @@ function draw_radar_image(cr,x,y,width,height)
         Utils.drawLine(cr,target2_x-10,target2_y,-60,0,lineProps2)
         
         --local weatherDate = last_json.current_condition[1].localObsDateTime
-        Utils.drawText(cr, x, y + height + 20,"Last Update: " .. last_json_update .. "                                Lat: 49.86832, Lon: 8.92904")
+        Utils.drawText(cr, x, y + height + 20,"Last Update: " .. last_json_update .. "                                      Lat: " .. last_json.latitude .. ", Lon: " .. last_json.longitude)
         --Utils.drawText(cr, x, y + height + 32,"Last Querry:  " .. last_json_update)
     end
 end
@@ -170,31 +166,23 @@ function update()
     
     last_json = obj_or_err
 
-    local hourly_tempC, hourly_perticipprob, hourly_humidity = {}, {}, {}
-    for _, w in ipairs(obj_or_err.weather or {}) do
-        if w.hourly then
-            for _, h in ipairs(w.hourly) do
-                table.insert(hourly_tempC, tonumber(h.tempC) or 0)
-                local rain = math.max(tonumber(h.chanceofrain) or 0, tonumber(h.chanceofsnow) or 0)
-                table.insert(hourly_perticipprob, rain)
-                table.insert(hourly_humidity, tonumber(h.humidity) or 0)
+    probs = {}
+    for i=1,#last_json.minutely_15.time,1 do
+        for j=1,#last_json.hourly.time,1 do
+            if last_json.minutely_15.time[i]==last_json.hourly.time[j] then
+                --print(last_json.hourly.time[j] .. ": " .. last_json.hourly.precipitation_probability[j])
+                table.insert(probs,last_json.hourly.precipitation_probability[j])
+                break
             end
         end
     end
 
-    if #hourly_tempC == 0 then
-        print("No temperature data found.")
-        return
-    end
+    local temps=Utils.split_table(last_json.hourly.temperature_2m,24)
+    local perticipprobs=Utils.split_table(last_json.hourly.precipitation_probability,24)
+    local humidities=Utils.split_table(last_json.hourly.relative_humidity_2m,24)
     
-    local temps=Utils.split_table(hourly_tempC,8)
-    local perticipprobs=Utils.split_table(hourly_perticipprob,8)
-    local humidities=Utils.split_table(hourly_humidity,8)
-    
-    -- print("temps: ", #temps.right)
-    
-    add_8_hours_forecast(temps.left,perticipprobs.left,humidities.left)
-    add_2_days_forecast(temps.right,perticipprobs.right,humidities.right)
+    add_24_hours_forecast(last_json.minutely_15.temperature_2m,probs,last_json.minutely_15.relative_humidity_2m)
+    add_7_days_forecast(temps.right,perticipprobs.right,humidities.right)
 end
 
 function conky_draw_weather_widget()
@@ -223,44 +211,36 @@ function conky_draw_weather_widget()
             chart:draw_chart(cr) 
         end
 
-        local current_condition = last_json.current_condition[1]
-        local today = last_json.weather[1]
-        local tomorrow = last_json.weather[2]
-        local dayAfter = last_json.weather[3]
+        local current_condition = last_json.current
         local hour_now = tonumber(os.date("%H"))
-        local hour_now_index = math.floor((hour_now/3)+1)
+        local hour_now_index = math.floor((hour_now)+1)
 
-        local sunrise_ts = Utils.getDateFromTime(today.astronomy[1].sunrise,current_time)
-        local sunset_ts = Utils.getDateFromTime(today.astronomy[1].sunset,current_time)
+        local sunrise_ts = Utils.getDateFromDateTime(last_json.daily.sunrise[1],current_time)
+        local sunset_ts = Utils.getDateFromDateTime(last_json.daily.sunrise[1],current_time)
         local is_day = sunrise_ts < current_time and current_time < sunset_ts
         local dayNightString = "d"
         if not is_day then
             dayNightString = "n"
         end
         
-        Utils.draw_scaled_image_surface(cr,getImage(Utils.getWeatherIconPath(current_condition.weatherCode,dayNightString .. "_t@2x-blue")),-5,15,100,100)
-        Utils.drawText(cr, 90,50,current_condition.lang_de[1].value,Utils.getFont("#3B5969FF",14))
-        Utils.drawText(cr, 90,65,"Temp: " .. current_condition.temp_C .. "°C (" .. current_condition.FeelsLikeC .. "°C)")
-        Utils.drawText(cr, 90,80,"Wolken: " .. current_condition.cloudcover .. "%")
-        local chanceofrain = tonumber(today.hourly[hour_now_index].chanceofrain)
-        local chanceofsnow = tonumber(today.hourly[hour_now_index].chanceofsnow)
-        local chanceOfPrecipitation = chanceofrain
-        if chanceofrain < chanceofsnow then
-            chanceOfPrecipitation = chanceofsnow
-        end
+        Utils.draw_scaled_image_surface(cr,getImage(Utils.getWMOIconPath(current_condition.weather_code,dayNightString .. "_t@2x-blue")),-5,15,100,100)
+        Utils.drawText(cr, 90,50,Utils.getDescriptionFromWMOIconCode(current_condition.weather_code),Utils.getFont("#3B5969FF",14))
+        Utils.drawText(cr, 90,65,"Temp: " .. current_condition.temperature_2m .. "°C (" .. last_json.hourly.apparent_temperature[hour_now_index] .. "°C)")
+        Utils.drawText(cr, 90,80,"Wolken: " .. current_condition.cloud_cover .. "%")
+        local chanceOfPrecipitation = tonumber(last_json.hourly.precipitation_probability[hour_now_index])
         Utils.drawText(cr, 90,95,"Niederschlag: " .. chanceOfPrecipitation .. "%")
 
         Utils.draw_scaled_image_surface(cr,getImage(os.getenv("HOME") .. "/.conky/weather-widget/icons/sun/sunrise_blue1.png"),232,32,26,26)
-        Utils.drawText(cr, 268,50,today.astronomy[1].sunrise)
+        Utils.drawText(cr, 268,50,Utils.splitString(last_json.daily.sunrise[1],"T")[2])
         Utils.draw_scaled_image_surface(cr,getImage(os.getenv("HOME") .. "/.conky/weather-widget/icons/sun/sunset_blue1.png"),318,31,26,26)
-        Utils.drawText(cr, 350,50,today.astronomy[1].sunset)
+        Utils.drawText(cr, 350,50,Utils.splitString(last_json.daily.sunset[1],"T")[2])
         Utils.draw_scaled_image_surface(cr,getImage(os.getenv("HOME") .. "/.conky/weather-widget/icons/arrow/cardinal-points_clean_blue.png"),226,60,38,38)
-        winddirDegreeMod=(current_condition.winddirDegree % 45)
-        winddirDegreeMod=math.floor(current_condition.winddirDegree - winddirDegreeMod)
+        winddirDegreeMod=(current_condition.wind_direction_10m % 45)
+        winddirDegreeMod=math.floor(current_condition.wind_direction_10m - winddirDegreeMod)
         Utils.draw_scaled_image_surface(cr,getImage(os.getenv("HOME") .. "/.conky/weather-widget/icons/arrow/arrow_blue2-" .. winddirDegreeMod .. ".png"),227,61,38,38)
 
-        Utils.drawText(cr, 268,75,"Wind: " .. current_condition.winddirDegree .. "°, " .. current_condition.windspeedKmph .."km/h")
-        Utils.drawText(cr, 268,90,"Luftf.: " .. current_condition.humidity .. "% Druck: " .. current_condition.pressure .."hPa")
+        Utils.drawText(cr, 268,75,"Wind: " .. current_condition.wind_direction_10m .. "°, " .. current_condition.wind_speed_10m .."km/h")
+        Utils.drawText(cr, 268,90,"Luftf.: " .. current_condition.relative_humidity_2m .. "% Druck: " .. current_condition.surface_pressure .."hPa")
         
 
         local chart1Start = 110
@@ -269,40 +249,55 @@ function conky_draw_weather_widget()
         Utils.drawText(cr, 0,chart1Start + 50,string.format("%.0f°C",forecast1_minmax.min))
         Utils.drawText(cr, 380,chart1Start + 50,string.format("%.0f°C",forecast1_minmax.min))
 
-        local step = 350/7
-        for i=0,7,1 do
-            local val = i*3
-            if val > 10 then
-                Utils.drawText(cr, 15+i*step,chart1Start + 65,string.format("%dh",val))
-            else
-                Utils.drawText(cr, 18+i*step,chart1Start + 65,string.format("%dh",val))
+        local step = 350/95
+        local found_first = false
+        local mod = 0
+        for i=0,95,1 do
+            local hourIndex = 0
+            for j=1,#last_json.hourly.time+1,1 do
+                if last_json.minutely_15.time[i+1]==last_json.hourly.time[j] then
+                    hourIndex = j
+
+                    Utils.drawLine(cr,25+i*step,chart1Start + 50,0,5)
+
+                    if hourIndex%2 == 0 then
+                        local hour_then = hourIndex % 24
+
+                        is_day = last_json.minutely_15.is_day[i+1] == 1
+                        dayNightString = "d"
+                        if not is_day then
+                            dayNightString = "n"
+                        end
+
+                        local imagePath = Utils.getWMOIconPath(last_json.minutely_15.weather_code[i+1],dayNightString .. "_t@1x-blue")
+                        local image = getImage(imagePath)
+                        Utils.draw_scaled_image_surface(cr,image,6+i*step,2+chart1Start + 60,38,38)
+
+                        -- print(hour_then .. " " .. last_json.minutely_15.time[val+1] .. " " .. last_json.hourly.time[hour_then+1])
+
+                        if hour_then > 10 then
+                            Utils.drawText(cr, 15+i*step,chart1Start + 65,string.format("%dh",hour_then))
+                        else
+                            Utils.drawText(cr, 18+i*step,chart1Start + 65,string.format("%dh",hour_then))
+                        end
+
+                        local val = tonumber(last_json.minutely_15.temperature_2m[i+1])
+                        local val2 = tonumber(last_json.hourly.apparent_temperature[hourIndex])
+                        if val >= 10 then
+                            Utils.drawText(cr, 13+i*step,chart1Start + 112,string.format("%1.f°C",val))
+                        else
+                            Utils.drawText(cr, 16+i*step,chart1Start + 112,string.format("%1.f°C",val))
+                        end
+                        if val2 >= 10 then
+                            Utils.drawText(cr, 13+i*step,chart1Start + 125,string.format("(%1.f°C)",val2),Utils.getFont("#3B5969FF",8))
+                        else
+                            Utils.drawText(cr, 16+i*step,chart1Start + 125,string.format("(%1.f°C)",val2),Utils.getFont("#3B5969FF",8))
+                        end
+                    end
+                    break
+                end
             end
 
-            local hour = today.hourly[i+1]
-
-            ts = Utils.getDateFromTime(string.format("%02d:00 AM",val),current_time)
-            is_day = sunrise_ts < ts and ts < sunset_ts
-            dayNightString = "d"
-            if not is_day then
-                dayNightString = "n"
-            end
-
-            local imagePath = Utils.getWeatherIconPath(hour.weatherCode,dayNightString .. "_t@1x-blue")
-            local image = getImage(imagePath)
-            Utils.draw_scaled_image_surface(cr,image,i*step,chart1Start + 60,50,50)
-
-            val = tonumber(hour.tempC)
-            local val2 = tonumber(hour.FeelsLikeC)
-            if val >= 10 then
-                Utils.drawText(cr, 13+i*step,chart1Start + 112,string.format("%d°C",val))
-            else
-                Utils.drawText(cr, 16+i*step,chart1Start + 112,string.format("%d°C",val))
-            end
-            if val2 >= 10 then
-                Utils.drawText(cr, 13+i*step,chart1Start + 125,string.format("(%d°C)",val2),Utils.getFont("#3B5969FF",8))
-            else
-                Utils.drawText(cr, 16+i*step,chart1Start + 125,string.format("(%d°C)",val2),Utils.getFont("#3B5969FF",8))
-            end
         end
 
         local chart2Start = 250
@@ -311,57 +306,45 @@ function conky_draw_weather_widget()
         Utils.drawText(cr, 0,chart2Start + 50,string.format("%.0f°C",forecast2_minmax.min))
         Utils.drawText(cr, 380,chart2Start + 50,string.format("%.0f°C",forecast2_minmax.min))
 
-        local tomorrowDayOfWeek = Utils.getDayOfWeekString(os.date("%w",ts+86400))
-        local dayAfterDayOfWeek = Utils.getDayOfWeekString(os.date("%w",ts+86400*2))
-        Utils.drawText(cr, 75,chart2Start + 65,tomorrowDayOfWeek)
-        Utils.drawText(cr, 200,chart2Start + 65,"|")
-        Utils.drawText(cr, 275,chart2Start + 65,dayAfterDayOfWeek)
 
-        step = 350/15
-        for i=0,15,1 do
-            local val = i*3 % 24
-            if val > 10 then
-                Utils.drawText(cr, 15+i*step,chart2Start + 80,string.format("%dh",val))
-            else
-                Utils.drawText(cr, 18+i*step,chart2Start + 80,string.format("%dh",val))
+        step = 350/143
+        for i=0,143,1 do
+            if i%24==0 then
+                Utils.drawLine(cr,25+i*step,chart2Start + 50,0,5)
             end
+            if i%12==0 and not (i%24==0) then
+                local dayOfWeekString = Utils.getDayOfWeekStringShort(os.date("%w",Utils.getDateFromDateTime(last_json.hourly.time[i+25])))
+                Utils.drawText(cr, 20+i*step,chart2Start + 65,dayOfWeekString)
+                --Utils.drawText(cr, 200,chart2Start + 65,"|")
+                
+                is_day = last_json.hourly.is_day[i+25] == 1
+                dayNightString = "d"
+                if not is_day then
+                    dayNightString = "n"
+                end
 
-            local hour = {}
-            if i<8 then
-                hour = tomorrow.hourly[i+1]
-            else
-                hour = dayAfter.hourly[i-8+1]
-            end
+                local imagePath = Utils.getWMOIconPath(last_json.hourly.weather_code[i+25],dayNightString .. "_t@0.5x-blue")
+                local image = getImage(imagePath)
+                Utils.draw_scaled_image_surface(cr,image,14+i*step,chart2Start + 63,25,25)
 
-
-            ts = Utils.getDateFromTime(string.format("%02d:00 AM",val),current_time)
-            is_day = sunrise_ts < ts and ts < sunset_ts
-            dayNightString = "d"
-            if not is_day then
-                dayNightString = "n"
-            end
-
-
-            local imagePath = Utils.getWeatherIconPath(hour.weatherCode,dayNightString .. "_t@0.5x-blue")
-            local image = getImage(imagePath)
-            Utils.draw_scaled_image_surface(cr,image,12+i*step,chart2Start + 81,25,25)
-
-            val = tonumber(hour.tempC)
-            local val2 = tonumber(hour.FeelsLikeC)
-            if val >= 10 then
-                Utils.drawText(cr, 15+i*step,chart2Start + 115,string.format("%d°C",val),Utils.getFont("#3B5969FF",8))
-            else
-                Utils.drawText(cr, 18+i*step,chart2Start + 115,string.format("%d°C",val),Utils.getFont("#3B5969FF",8))
-            end
-            if val2 >= 10 then
-                Utils.drawText(cr, 15+i*step,chart2Start + 125,string.format("(%d°C)",val2),Utils.getFont("#3B5969FF",7))
-            else
-                Utils.drawText(cr, 17+i*step,chart2Start + 125,string.format("(%d°C)",val2),Utils.getFont("#3B5969FF",7))
+                local val = tonumber(last_json.hourly.temperature_2m[i+25])
+                local val2 = tonumber(last_json.hourly.apparent_temperature[i+25])
+                if val >= 10 then
+                    Utils.drawText(cr, 17+i*step,chart2Start + 95,string.format("%1.f°C",val),Utils.getFont("#3B5969FF",8))
+                else
+                    Utils.drawText(cr, 19+i*step,chart2Start + 95,string.format("%1.f°C",val),Utils.getFont("#3B5969FF",8))
+                end
+                if val2 >= 10 then
+                    Utils.drawText(cr, 17+i*step,chart2Start + 105,string.format("(%1.f°C)",val2),Utils.getFont("#3B5969FF",7))
+                else
+                    Utils.drawText(cr, 20+i*step,chart2Start + 105,string.format("(%1.f°C)",val2),Utils.getFont("#3B5969FF",7))
+                end
             end
         end
+        Utils.drawLine(cr,375,chart2Start + 50,0,5)
     end
 
-    draw_radar_image(cr,10,390,380,380)
+    draw_radar_image(cr,10,365,380,380)
 
 
     cairo_surface_destroy(cs)

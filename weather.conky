@@ -68,11 +68,11 @@ conky.config = {
 	font2 = 'Droid Sans:pixelsize=10',
 	font9 = 'ConkySymbols:BOLD:pixelsize=18',
 	 
-    lua_load = '~/.conky/weather-widget/lua/Main.lua',
-    lua_draw_hook_pre = 'draw_weather_widget',
+    lua_load = '~/.conky/weather-widget/lua/OpenMeteoWeatherWidget.lua',
+    lua_draw_hook_pre = 'conky_draw_weather_widget',
 };
 conky.text = [[
 ${goto 10}${color1}${font9}H${font0} Weather
 ${voffset -10}${color1}${hr 1}${font2}
-${texecpi 60 ~/.conky/weather-widget/weather.sh}
+${texecpi 60 ~/.conky/weather-widget/weather.sh open-meteo LATITUDE LONGITUDE}
 ]];

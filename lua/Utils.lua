@@ -15,7 +15,28 @@ function Utils.getDateFromTime(time,baseTimeString)
         hours = string.format('%2d', tonumber(hours) + 12)
     end
     timeDate.hour = hours
-    timeDate.minutes = minutes
+    timeDate.min = minutes
+    
+    local convertedTimestamp = os.time(timeDate)
+    return convertedTimestamp
+end
+
+-- time as a timestamp in the format %Y-%m-%dT%h:%M format, and now in unix seconds
+function Utils.getDateFromDateTime(time,baseTimeString)
+    local baseDate = os.date('*t',baseTimeString)
+    local timeDate = Utils.copyTable(baseDate)
+    
+    local years, months, days, hours, minutes = time:match("^(%d%d%d%d)-(%d%d)-(%d%d)T(%d%d):(%d%d)$")
+    if not hours then
+        error('could not parse time "' .. time .. '"')
+    end
+    timeDate.year = years
+    timeDate.month = months
+    timeDate.day = days
+    timeDate.yday = nil
+    timeDate.wday = nil
+    timeDate.hour = hours
+    timeDate.min = minutes
     
     local convertedTimestamp = os.time(timeDate)
     return convertedTimestamp
@@ -30,6 +51,19 @@ function Utils.getDayOfWeekString(dayOfWeek)
         [5] = "Donnerstag",
         [6] = "Freitag",
         [7] = "Samstag",
+    }
+    return dayOfWeekStrings[dayOfWeek+1]
+end
+
+function Utils.getDayOfWeekStringShort(dayOfWeek)
+    local dayOfWeekStrings = {
+        [1] = "So",
+        [2] = "Mo",
+        [3] = "Di",
+        [4] = "Mi",
+        [5] = "Do",
+        [6] = "Fr",
+        [7] = "Sa",
     }
     return dayOfWeekStrings[dayOfWeek+1]
 end
@@ -144,6 +178,45 @@ function Utils.getWeatherIconPath(iconCode,icon_suffix)
     return os.getenv("HOME") .. "/.conky/weather-widget/icons/owm-icons-blue/" .. fileName
 end
 
+function Utils.getWMOIconPath(iconCode,icon_suffix)
+    local fileName = Utils.getOpenWeatherMapIconCodeFromWMOIconCode(iconCode) .. icon_suffix .. ".png"
+    return os.getenv("HOME") .. "/.conky/weather-widget/icons/owm-icons-blue/" .. fileName
+end
+
+function Utils.getOpenWeatherMapIconCodeFromWMOIconCode(iconCode)
+    local weatherIcons = {
+        [0] = "01",
+        [1] = "02",
+        [2] = "03",
+        [3] = "04",
+        [45] = "50",
+        [48] = "50",
+        [51] = "10",
+        [53] = "10",
+        [55] = "10",
+        [56] = "10",
+        [57] = "10",
+        [61] = "09",
+        [63] = "09",
+        [65] = "09",
+        [66] = "09",
+        [67] = "09",
+        [71] = "10",
+        [73] = "09",
+        [75] = "09",
+        [77] = "09",
+        [80] = "09",
+        [81] = "09",
+        [82] = "09",
+        [85] = "10",
+        [86] = "09",
+        [95] = "11",
+        [96] = "11",
+        [99] = "11"
+    }
+    return weatherIcons[iconCode]
+end
+
 function Utils.getOpenWeatherMapIconCodeFromWorldWeatherOnlineIconCode(iconCode)
     local weatherIcons = {
         ["113"] = "01",
@@ -198,6 +271,40 @@ function Utils.getOpenWeatherMapIconCodeFromWorldWeatherOnlineIconCode(iconCode)
     return weatherIcons[iconCode]
 end
 
+function Utils.getDescriptionFromWMOIconCode(iconCode)
+    local weatherIcons = {
+        [0] = "Klar",
+        [1] = "Leicht Bewölkt",
+        [2] = "Bewölkt",
+        [3] = "Stark Bewölkt",
+        [45] = "Nebelig",
+        [48] = "Reifnebel",
+        [51] = "Leichter Nieselregen",
+        [53] = "Nieselregen",
+        [55] = "Starker Nieselregen",
+        [56] = "Gefrierender Nieselregen",
+        [57] = "Frierender Nieselregen",
+        [61] = "Leichter Regen",
+        [63] = "Regen",
+        [65] = "Starker Regen",
+        [66] = "Gefrierender Regen",
+        [67] = "Frierender Regen",
+        [71] = "Leichter Schnee",
+        [73] = "Schnee",
+        [75] = "Starker Schnee",
+        [77] = "Schneehagel",
+        [80] = "Leichter Regenschauer",
+        [81] = "Regenschauer",
+        [82] = "Starker Regenschauer",
+        [85] = "Leichter Schneeschauer",
+        [86] = "Schneeschauer",
+        [95] = "Gewitter",
+        [96] = "Leichtes Hagelgewitter",
+        [99] = "Hagelgewitter"
+    }
+    return weatherIcons[iconCode]
+end
+
 function Utils.printTableKeys(t)
     for k,v in pairs(t) do
         print(k)
@@ -230,6 +337,24 @@ function Utils.read_file(path)
     local content = f:read("*a")
     f:close()
     return content
+end
+
+-- define a function to spring a string with give separator
+function Utils.splitString(inputstr, sep)
+   -- if sep is null, set it as space
+   if sep == nil then
+      sep = '%s'
+   end
+   -- define an array
+   local t={}
+   -- split string based on sep   
+   for str in string.gmatch(inputstr, '([^'..sep..']+)') 
+   do
+      -- insert the substring in table
+      table.insert(t, str)
+   end
+   -- return the array
+   return t
 end
 
 return Utils

@@ -1,49 +1,49 @@
-WeatherCode,Condition,DayIcon,NightIcon,DayIcon2,NightIcon2,additional_icon,additional_info
-113,Clear/Sunny,wsymbol_0001_sunny,wsymbol_0008_clear_sky_night,01d,01n,,
-116,Partly Cloudy,wsymbol_0002_sunny_intervals,wsymbol_0008_clear_sky_night,02d,02n,,
-119,Cloudy,wsymbol_0003_white_cloud,wsymbol_0004_black_low_cloud,03d,03n,,
-122,Overcast,wsymbol_0004_black_low_cloud,wsymbol_0004_black_low_cloud,04d,04n,,
-143,Mist,wsymbol_0006_mist,wsymbol_0006_mist,50d,50n,,
-176,Patchy rain nearby,wsymbol_0009_light_rain_showers,wsymbol_0025_light_rain_showers_night,10d,10n,,
-179,Patchy snow nearby,wsymbol_0013_sleet_showers,wsymbol_0029_sleet_showers_night,10d,10n,13d,snow
-182,Patchy sleet nearby,wsymbol_0021_cloudy_with_sleet,wsymbol_0037_cloudy_with_sleet_night,10d,10n,13d,snow
-185,Patchy freezing drizzle nearby,wsymbol_0021_cloudy_with_sleet,wsymbol_0037_cloudy_with_sleet_night,10d,10n,13d,snow
-200,Thundery outbreaks in nearby,wsymbol_0016_thundery_showers,wsymbol_0032_thundery_showers_night,11d,11n,,
-227,Blowing snow,wsymbol_0019_cloudy_with_light_snow,wsymbol_0035_cloudy_with_light_snow_night,09d,09n,13d,snow
-230,Blizzard,wsymbol_0020_cloudy_with_heavy_snow,wsymbol_0036_cloudy_with_heavy_snow_night,09d,09n,13d,snow
-248,Fog,wsymbol_0007_fog,wsymbol_0007_fog,50d,50n,,
-260,Freezing fog,wsymbol_0007_fog,wsymbol_0007_fog,50d,50n,13d,snow
-263,Patchy light drizzle,wsymbol_0009_light_rain_showers,wsymbol_0025_light_rain_showers_night,09d,09n,,
-266,Light drizzle,wsymbol_0017_cloudy_with_light_rain,wsymbol_0033_cloudy_with_light_rain_night,09d,09n,,
-281,Freezing drizzle,wsymbol_0021_cloudy_with_sleet,wsymbol_0037_cloudy_with_sleet_night,09d,09n,13d,snow
-284,Heavy freezing drizzle,wsymbol_0021_cloudy_with_sleet,wsymbol_0037_cloudy_with_sleet_night,09d,09n,13d,snow
-293,Patchy light rain,wsymbol_0017_cloudy_with_light_rain,wsymbol_0033_cloudy_with_light_rain_night,10d,10n,,
-296,Light rain,wsymbol_0017_cloudy_with_light_rain,wsymbol_0025_light_rain_showers_night,10d,10n,,
-299,Moderate rain at times,wsymbol_0010_heavy_rain_showers,wsymbol_0026_heavy_rain_showers_night,10d,10n,,
-302,Moderate rain,wsymbol_0018_cloudy_with_heavy_rain,wsymbol_0034_cloudy_with_heavy_rain_night,09d,09n,,
-305,Heavy rain at times,wsymbol_0010_heavy_rain_showers,wsymbol_0026_heavy_rain_showers_night,09d,09n,,
-308,Heavy rain,wsymbol_0018_cloudy_with_heavy_rain,wsymbol_0034_cloudy_with_heavy_rain_night,09d,09n,,
-311,Light freezing rain,wsymbol_0021_cloudy_with_sleet,wsymbol_0037_cloudy_with_sleet_night,09d,09n,13d,snow
-314,Moderate or Heavy freezing rain,wsymbol_0021_cloudy_with_sleet,wsymbol_0037_cloudy_with_sleet_night,09d,09n,13d,snow
-317,Light sleet,wsymbol_0021_cloudy_with_sleet,wsymbol_0037_cloudy_with_sleet_night,10d,10n,13d,snow
-320,Moderate or heavy sleet,wsymbol_0019_cloudy_with_light_snow,wsymbol_0035_cloudy_with_light_snow_night,09d,09n,13d,snow
-323,Patchy light snow,wsymbol_0011_light_snow_showers,wsymbol_0027_light_snow_showers_night,10d,10n,13d,snow
-326,Light snow,wsymbol_0011_light_snow_showers,wsymbol_0027_light_snow_showers_night,10d,10n,13d,snow
-329,Patchy moderate snow,wsymbol_0020_cloudy_with_heavy_snow,wsymbol_0036_cloudy_with_heavy_snow_night,10d,10n,13d,snow
-332,Moderate snow,wsymbol_0020_cloudy_with_heavy_snow,wsymbol_0036_cloudy_with_heavy_snow_night,09d,09n,13d,snow
-335,Patchy heavy snow,wsymbol_0012_heavy_snow_showers,wsymbol_0028_heavy_snow_showers_night,09d,09n,13d,snow
-338,Heavy snow,wsymbol_0020_cloudy_with_heavy_snow,wsymbol_0036_cloudy_with_heavy_snow_night,09d,09n,13d,snow
-350,Ice pellets,wsymbol_0021_cloudy_with_sleet,wsymbol_0037_cloudy_with_sleet_night,09d,09n,13d,snow
-353,Light rain shower,wsymbol_0009_light_rain_showers,wsymbol_0025_light_rain_showers_night,10d,10n,,
-356,Moderate or heavy rain shower,wsymbol_0010_heavy_rain_showers,wsymbol_0026_heavy_rain_showers_night,10d,10n,,
-359,Torrential rain shower,wsymbol_0018_cloudy_with_heavy_rain,wsymbol_0034_cloudy_with_heavy_rain_night,10d,10n,,
-362,Light sleet showers,wsymbol_0013_sleet_showers,wsymbol_0029_sleet_showers_night,10d,10n,13d,snow
-365,Moderate or heavy sleet showers,wsymbol_0013_sleet_showers,wsymbol_0029_sleet_showers_night,09d,09n,13d,snow
-368,Light snow showers,wsymbol_0011_light_snow_showers,wsymbol_0027_light_snow_showers_night,10d,10n,13d,snow
-371,Moderate or heavy snow showers,wsymbol_0012_heavy_snow_showers,wsymbol_0028_heavy_snow_showers_night,09d,09n,13d,snow
-374,Light showers of ice pellets,wsymbol_0013_sleet_showers,wsymbol_0029_sleet_showers_night,09d,09n,13d,snow
-377,Moderate or heavy showers of ice pellets,wsymbol_0021_cloudy_with_sleet,wsymbol_0037_cloudy_with_sleet_night,10d,10n,13d,snow
-386,Patchy light rain in area with thunder,wsymbol_0016_thundery_showers,wsymbol_0032_thundery_showers_night,11d,11n,,
-389,Moderate or heavy rain in area with thunder,wsymbol_0024_thunderstorms,wsymbol_0040_thunderstorms_night,11d,11n,,
-392,Patchy light snow in area with thunder,wsymbol_0016_thundery_showers,wsymbol_0032_thundery_showers_night,11d,11n,13d,snow
-395,Moderate or heavy snow in area with thunder,wsymbol_0012_heavy_snow_showers,wsymbol_0028_heavy_snow_showers_night,09d,09n,13d,snow
+WeatherCode,WMO Codes,Condition,DayIcon,NightIcon,DayIcon2,NightIcon2,additional_icon,additional_info
+113,0,Clear/Sunny,wsymbol_0001_sunny,wsymbol_0008_clear_sky_night,01d,01n,,
+116,2,Partly Cloudy,wsymbol_0002_sunny_intervals,wsymbol_0008_clear_sky_night,02d,02n,,
+119,1,Cloudy,wsymbol_0003_white_cloud,wsymbol_0004_black_low_cloud,03d,03n,,
+122,3,Overcast,wsymbol_0004_black_low_cloud,wsymbol_0004_black_low_cloud,04d,04n,,
+143,48,Mist,wsymbol_0006_mist,wsymbol_0006_mist,50d,50n,,
+176,80,Patchy rain nearby,wsymbol_0009_light_rain_showers,wsymbol_0025_light_rain_showers_night,10d,10n,,
+179,,Patchy snow nearby,wsymbol_0013_sleet_showers,wsymbol_0029_sleet_showers_night,10d,10n,13d,snow
+182,,Patchy sleet nearby,wsymbol_0021_cloudy_with_sleet,wsymbol_0037_cloudy_with_sleet_night,10d,10n,13d,snow
+185,,Patchy freezing drizzle nearby,wsymbol_0021_cloudy_with_sleet,wsymbol_0037_cloudy_with_sleet_night,10d,10n,13d,snow
+200,,Thundery outbreaks in nearby,wsymbol_0016_thundery_showers,wsymbol_0032_thundery_showers_night,11d,11n,,
+227,,Blowing snow,wsymbol_0019_cloudy_with_light_snow,wsymbol_0035_cloudy_with_light_snow_night,09d,09n,13d,snow
+230,,Blizzard,wsymbol_0020_cloudy_with_heavy_snow,wsymbol_0036_cloudy_with_heavy_snow_night,09d,09n,13d,snow
+248,45,Fog,wsymbol_0007_fog,wsymbol_0007_fog,50d,50n,,
+260,,Freezing fog,wsymbol_0007_fog,wsymbol_0007_fog,50d,50n,13d,snow
+263,51,Patchy light drizzle,wsymbol_0009_light_rain_showers,wsymbol_0025_light_rain_showers_night,09d,09n,,
+266,"53,55",Light drizzle,wsymbol_0017_cloudy_with_light_rain,wsymbol_0033_cloudy_with_light_rain_night,09d,09n,,
+281,56,Freezing drizzle,wsymbol_0021_cloudy_with_sleet,wsymbol_0037_cloudy_with_sleet_night,09d,09n,13d,snow
+284,57,Heavy freezing drizzle,wsymbol_0021_cloudy_with_sleet,wsymbol_0037_cloudy_with_sleet_night,09d,09n,13d,snow
+293,,Patchy light rain,wsymbol_0017_cloudy_with_light_rain,wsymbol_0033_cloudy_with_light_rain_night,10d,10n,,
+296,61,Light rain,wsymbol_0017_cloudy_with_light_rain,wsymbol_0025_light_rain_showers_night,10d,10n,,
+299,81,Moderate rain at times,wsymbol_0010_heavy_rain_showers,wsymbol_0026_heavy_rain_showers_night,10d,10n,,
+302,63,Moderate rain,wsymbol_0018_cloudy_with_heavy_rain,wsymbol_0034_cloudy_with_heavy_rain_night,09d,09n,,
+305,82,Heavy rain at times,wsymbol_0010_heavy_rain_showers,wsymbol_0026_heavy_rain_showers_night,09d,09n,,
+308,65,Heavy rain,wsymbol_0018_cloudy_with_heavy_rain,wsymbol_0034_cloudy_with_heavy_rain_night,09d,09n,,
+311,66,Light freezing rain,wsymbol_0021_cloudy_with_sleet,wsymbol_0037_cloudy_with_sleet_night,09d,09n,13d,snow
+314,67,Moderate or Heavy freezing rain,wsymbol_0021_cloudy_with_sleet,wsymbol_0037_cloudy_with_sleet_night,09d,09n,13d,snow
+317,,Light sleet,wsymbol_0021_cloudy_with_sleet,wsymbol_0037_cloudy_with_sleet_night,10d,10n,13d,snow
+320,,Moderate or heavy sleet,wsymbol_0019_cloudy_with_light_snow,wsymbol_0035_cloudy_with_light_snow_night,09d,09n,13d,snow
+323,,Patchy light snow,wsymbol_0011_light_snow_showers,wsymbol_0027_light_snow_showers_night,10d,10n,13d,snow
+326,71,Light snow,wsymbol_0011_light_snow_showers,wsymbol_0027_light_snow_showers_night,10d,10n,13d,snow
+329,,Patchy moderate snow,wsymbol_0020_cloudy_with_heavy_snow,wsymbol_0036_cloudy_with_heavy_snow_night,10d,10n,13d,snow
+332,73,Moderate snow,wsymbol_0020_cloudy_with_heavy_snow,wsymbol_0036_cloudy_with_heavy_snow_night,09d,09n,13d,snow
+335,,Patchy heavy snow,wsymbol_0012_heavy_snow_showers,wsymbol_0028_heavy_snow_showers_night,09d,09n,13d,snow
+338,75,Heavy snow,wsymbol_0020_cloudy_with_heavy_snow,wsymbol_0036_cloudy_with_heavy_snow_night,09d,09n,13d,snow
+350,,Ice pellets,wsymbol_0021_cloudy_with_sleet,wsymbol_0037_cloudy_with_sleet_night,09d,09n,13d,snow
+353,,Light rain shower,wsymbol_0009_light_rain_showers,wsymbol_0025_light_rain_showers_night,10d,10n,,
+356,,Moderate or heavy rain shower,wsymbol_0010_heavy_rain_showers,wsymbol_0026_heavy_rain_showers_night,10d,10n,,
+359,,Torrential rain shower,wsymbol_0018_cloudy_with_heavy_rain,wsymbol_0034_cloudy_with_heavy_rain_night,10d,10n,,
+362,77,Light sleet showers,wsymbol_0013_sleet_showers,wsymbol_0029_sleet_showers_night,10d,10n,13d,snow
+365,,Moderate or heavy sleet showers,wsymbol_0013_sleet_showers,wsymbol_0029_sleet_showers_night,09d,09n,13d,snow
+368,85,Light snow showers,wsymbol_0011_light_snow_showers,wsymbol_0027_light_snow_showers_night,10d,10n,13d,snow
+371,86,Moderate or heavy snow showers,wsymbol_0012_heavy_snow_showers,wsymbol_0028_heavy_snow_showers_night,09d,09n,13d,snow
+374,,Light showers of ice pellets,wsymbol_0013_sleet_showers,wsymbol_0029_sleet_showers_night,09d,09n,13d,snow
+377,,Moderate or heavy showers of ice pellets,wsymbol_0021_cloudy_with_sleet,wsymbol_0037_cloudy_with_sleet_night,10d,10n,13d,snow
+386,95,Patchy light rain in area with thunder,wsymbol_0016_thundery_showers,wsymbol_0032_thundery_showers_night,11d,11n,,
+389,,Moderate or heavy rain in area with thunder,wsymbol_0024_thunderstorms,wsymbol_0040_thunderstorms_night,11d,11n,,
+392,"96,99",Patchy light snow in area with thunder,wsymbol_0016_thundery_showers,wsymbol_0032_thundery_showers_night,11d,11n,13d,snow
+395,,Moderate or heavy snow in area with thunder,wsymbol_0012_heavy_snow_showers,wsymbol_0028_heavy_snow_showers_night,09d,09n,13d,snow

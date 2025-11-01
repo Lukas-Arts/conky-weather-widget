@@ -8,7 +8,7 @@
 
 # get latest radar image
 img="$HOME/.conky/weather-widget/gif_frames_raw/latest_radar_view.png"
-curl -m 30 -s "https://www.dwd.de/DWD/wetter/radar/rad_${1}_akt.jpg" > "$img"
+curl -H "Accept-Encoding: gzip,deflate" -m 30 -s "https://www.dwd.de/DWD/wetter/radar/rad_${1}_akt.jpg" > "$img"
 datetime=$(date +%F_%H-%M)
 
 # alternatively get latest radar gif
