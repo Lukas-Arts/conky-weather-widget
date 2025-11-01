@@ -1,10 +1,10 @@
 # Conky Weather Widget
 
-A Weather Widget for Conky using [wttr.in](https://github.com/chubin/wttr.in) for Weather-Data and dwd.de for Rain Radar Images from Germany.
+A Weather Widget for Conky using [wttr.in](https://github.com/chubin/wttr.in) for Weather-Data and [dwd.de](dwd.de) for Rain Radar Images from Germany.
 
  ![Conky Weather Widget Preview](./weather.conky.png)
 
-The Charts show the baseline Temperature in light blue with an randomly estimated daily error rate, filled in a darker blue. The orange line indicates the chance of precipitation and the single darker blue line the humidity. The vertical red line shows the current time. 
+The Charts show the baseline Temperature in light blue with an randomly estimated error rate, filled in a darker blue. The orange line indicates the chance of precipitation and the single darker blue line the humidity. The vertical red line shows the current time. 
 
 The Radar Image is shown as an animation of the Images from the last 60 minutes
 
@@ -16,9 +16,11 @@ The Radar Image is shown as an animation of the Images from the last 60 minutes
 
 ## Setup Radar View
 
-To set up the Radar View edit the `weather.sh` and specify your region in line 21:
+To set up the Radar View edit the `weather.sh` and specify your `REGION` in line 21:
 
     get_and_crop_radar_log=$($HOME/.conky/weather-widget/get_and_crop_radar_image.sh "REGION" "DETAIL_VIEW_X" "DETAIL_VIEW_Y")
+
+For available `REGION`s check the [DWD Homepage](https://www.dwd.de/DE/leistungen/radarbild_film/radarbild_film.html)
 
 If `DETAIL_VIEW_X` and `DETAIL_VIEW_Y` are specified, a 3x zoomed, 150x150px detail view from the specified coordinates will be shown in the upper left corner (see preview).
 
