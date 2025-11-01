@@ -1,6 +1,6 @@
 # Conky Weather Widget
 
-A Weather Widget for Conky using [wttr.in](https://github.com/chubin/wttr.in) for Weather-Data and [dwd.de](dwd.de) for Rain Radar Images from Germany.
+A Weather Widget for Conky using [wttr.in](https://github.com/chubin/wttr.in) for Weather-Data and [dwd.de](https://dwd.de) for Rain Radar Images from Germany.
 
  ![Conky Weather Widget Preview](./weather.conky.png)
 

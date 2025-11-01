@@ -3,7 +3,8 @@
 # this script retrieves the latest radar image of region $1 from https://www.dwd.de/DWD/wetter/radar/rad_${1}_akt.jpg .
 # See https://www.dwd.de/DE/leistungen/radarbild_film/radarbild_film.html for available images.
 # for hes it cuts the image to fit better. this results in a 400x400 image instead of 540x500
-# a 50x50 detail part at x = $2, y = $3 is cut out, zoomed to 150x150, and pasted at the top left corner
+# A 50x50 Detail Part at x = $2, y = $3 (top left) is cut out, zoomed to 150x150, and pasted at the top left corner, 
+# if these values are set.
 
 # get latest radar image
 img="$HOME/.conky/weather-widget/gif_frames_raw/latest_radar_view.png"
