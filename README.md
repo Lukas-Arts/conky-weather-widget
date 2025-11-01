@@ -41,7 +41,7 @@ You might need to create these Folders for the Radar Images:
 
 And these Files:
 
-    ./weatherinfo.txt
+    ./weatherinfo.json
     ./last_update.txt
 
 ## Changing the Colors

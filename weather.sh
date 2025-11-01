@@ -13,7 +13,7 @@ my_now=$(date +%s)
 if ((my_now-last_update < 300)) then
     #echo "no update needed. reading old weather info..." >> "$HOME/.conky/weather-widget/weather.log"
     
-    weatherinfo=$(cat "$HOME/.conky/weather-widget/weatherinfo.txt")
+    weatherinfo=$(cat "$HOME/.conky/weather-widget/weatherinfo.json")
 else
     #echo "realoading weather data $(date +%T) $my_now  $last_update  $((my_now-last_update))" >> "$HOME/.conky/weather-widget/weather.log"
 
@@ -23,7 +23,7 @@ else
     #echo "no previous update found, or too old. updating weather info..."
     
     weatherinfo=$(curl -s "https://wttr.in/$1?format=j1&lang=de")
-    printf "$weatherinfo" > "$HOME/.conky/weather-widget/weatherinfo.txt"
+    printf "$weatherinfo" > "$HOME/.conky/weather-widget/weatherinfo.json"
     
     last_update=$my_now
     printf "$last_update" > "$HOME/.conky/weather-widget/last_update.txt"

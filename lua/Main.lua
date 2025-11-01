@@ -155,9 +155,9 @@ function update()
     end
     my_charts = {}
     
-    local json_text = Utils.read_file(os.getenv("HOME") .. "/.conky/weather-widget/weatherinfo.txt")
+    local json_text = Utils.read_file(os.getenv("HOME") .. "/.conky/weather-widget/weatherinfo.json")
     if not json_text or json_text == "" then
-        print("Error: weatherinfo.txt is empty or missing.")
+        print("Error: weatherinfo.json is empty or missing.")
         return
     end
     last_json_update = os.date("%Y-%m-%d %H:%M", tonumber(Utils.read_file(os.getenv("HOME") .. "/.conky/weather-widget/last_update.txt")))
