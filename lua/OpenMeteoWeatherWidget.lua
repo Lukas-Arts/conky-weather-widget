@@ -7,6 +7,7 @@ local Button = require('Button')
 local ProgressBar = require('ProgressBar')
 local DailyWeatherChartPanel = require('DailyWeatherChartPanel')
 local WeeklyWeatherChartPanel = require('WeeklyWeatherChartPanel')
+local CurrentWeatherInfoPanel = require('CurrentWeatherInfoPanel')
 local Utils  = require("Utils")
 
 
@@ -16,6 +17,7 @@ frames = {}
 last_update = 0
 last_json_update = 0
 last_json = {}
+currentWeatherInfoPanel = nil
 dailyWeatherChartPanel = nil
 weeklyWeatherChartPanel = nil
 buttonDaily = nil
@@ -105,7 +107,6 @@ function draw_radar_image(cr,x,y,width,height)
         
         --local weatherDate = last_json.current_condition[1].localObsDateTime
         Utils.drawText(cr, x, y + height + 20,"Last Update: " .. last_json_update .. "                                     Lat: " .. last_json.latitude .. ", Lon: " .. last_json.longitude)
-        --Utils.drawText(cr, x, y + height + 32,"Last Querry:  " .. last_json_update)
     end
 end
 
@@ -231,6 +232,13 @@ end
 
 function init()
     print("init widget")
+
+    currentWeatherInfoPanel = CurrentWeatherInfoPanel:new({
+        x_offset = 0,
+        y_offset = 28,
+        x_size = 400,
+        y_size = 100,
+    })
     dailyWeatherChartPanel = DailyWeatherChartPanel:new({
         x_offset = 0,
         y_offset = 132,
@@ -306,6 +314,11 @@ function init()
         onButtonClicked = toggleRadarSpeed
     })
     init_done = true
+
+    -- sync update rate with json/radar update rate
+    local waitSecAfterJSONUpdate = 10
+    last_update = tonumber(Utils.read_file(os.getenv("HOME") .. "/.conky/weather-widget/last_update.txt")) + waitSecAfterJSONUpdate
+    update()
 end
 
 function update_radar_frames()
@@ -316,7 +329,6 @@ function update_radar_frames()
         frames[i] = nil
     end
     frames = {}  -- clear whole table
-
 
     -- load new frame surfaces
     local frame_files = Utils.scandir(frame_dir)
@@ -335,7 +347,6 @@ function update()
         print("Error: weatherinfo.json is empty or missing.")
         return
     end
-    last_json_update = os.date("%Y-%m-%d %H:%M", tonumber(Utils.read_file(os.getenv("HOME") .. "/.conky/weather-widget/last_update.txt")))
 
     local ok, obj_or_err = pcall(json.decode, json_text)
     if not ok then
@@ -345,8 +356,11 @@ function update()
     
     last_json = obj_or_err
 
+    last_json_update = os.date("%Y-%m-%d %H:%M", last_update)
     dailyWeatherChartPanel:update(last_json)
     weeklyWeatherChartPanel:update(last_json)
+    update_radar_frames()
+    currentWeatherInfoPanel:update(last_json,last_update)
 end
 
 function conky_weather_widget_mouse_hook(event)
@@ -399,12 +413,12 @@ function conky_draw_weather_widget()
     if current_time - last_update > 300 then
         last_update = current_time
         update()
-        update_radar_frames()
     end
 
     if last_json == nil then
         Utils.drawText(cr, 10,50,"Unable to fetch WeatherInfo from wttr.in!",Utils.getFont("#993737",14))
     else
+        currentWeatherInfoPanel:draw(cr)
         buttonDaily:draw(cr)
         buttonWeekly:draw(cr)
         buttonPausePlay:draw(cr)
@@ -416,37 +430,6 @@ function conky_draw_weather_widget()
         if showWeekly then
             weeklyWeatherChartPanel:draw(cr)
         end
-
-        local current_condition = last_json.current
-        local hour_now = tonumber(os.date("%H"))
-        local hour_now_index = math.floor((hour_now)+1)
-        
-        local sunrise_ts = Utils.getDateFromDateTime(last_json.daily.sunrise[1],current_time)
-        local sunset_ts = Utils.getDateFromDateTime(last_json.daily.sunset[1],current_time)
-        local is_day = sunrise_ts < current_time and current_time < sunset_ts
-        local dayNightString = "d"
-        if not is_day then
-            dayNightString = "n"
-        end
-        
-        Utils.draw_scaled_image_surface(cr,getImage(Utils.getWMOIconPath(current_condition.weather_code,dayNightString .. "_t@2x-blue")),-5,15,100,100)
-        Utils.drawText(cr, 90,50,Utils.getDescriptionFromWMOIconCode(current_condition.weather_code),Utils.getFont("#3B5969FF",14))
-        Utils.drawText(cr, 90,65,"Temp: " .. current_condition.temperature_2m .. "°C (" .. last_json.hourly.apparent_temperature[hour_now_index] .. "°C)")
-        Utils.drawText(cr, 90,80,"Wolken: " .. current_condition.cloud_cover .. "%")
-        local chanceOfPrecipitation = tonumber(last_json.hourly.precipitation_probability[hour_now_index])
-        Utils.drawText(cr, 90,95,"Niederschlag: " .. chanceOfPrecipitation .. "%")
-
-        Utils.draw_scaled_image_surface(cr,getImage(os.getenv("HOME") .. "/.conky/weather-widget/icons/sun/sunrise_blue1.png"),232,32,26,26)
-        Utils.drawText(cr, 268,50,Utils.splitString(last_json.daily.sunrise[1],"T")[2])
-        Utils.draw_scaled_image_surface(cr,getImage(os.getenv("HOME") .. "/.conky/weather-widget/icons/sun/sunset_blue1.png"),318,31,26,26)
-        Utils.drawText(cr, 350,50,Utils.splitString(last_json.daily.sunset[1],"T")[2])
-        Utils.draw_scaled_image_surface(cr,getImage(os.getenv("HOME") .. "/.conky/weather-widget/icons/arrow/cardinal-points_clean_blue.png"),226,60,38,38)
-        local winddirDegreeMod=(current_condition.wind_direction_10m % 45)
-        winddirDegreeMod=math.floor(current_condition.wind_direction_10m - winddirDegreeMod)
-        Utils.draw_scaled_image_surface(cr,getImage(os.getenv("HOME") .. "/.conky/weather-widget/icons/arrow/arrow_blue2-" .. winddirDegreeMod .. ".png"),227,61,38,38)
-
-        Utils.drawText(cr, 268,75,"Wind: " .. current_condition.wind_direction_10m .. "°, " .. current_condition.wind_speed_10m .."km/h")
-        Utils.drawText(cr, 268,90,"Luftf.: " .. current_condition.relative_humidity_2m .. "% Druck: " .. current_condition.surface_pressure .."hPa")
     end
 
     if stopRadar == false then
