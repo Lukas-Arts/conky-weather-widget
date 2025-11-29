@@ -17,6 +17,8 @@ function Panel:new(config)
 
     self.background = config and config.background or nil
     self.name = config and config.name or 'Panel'
+    self.isFireMouseLeftEvent = config and config.isFireMouseLeftEvent or false
+    self.hasMouseLeft = true
     
     self.panels = {}
     
@@ -50,6 +52,7 @@ function Panel:remove_panel(panel)
 end
 
 function Panel:fireMouseLeftEvent(event)
+    self.hasMouseLeft = true
     for _, panel in ipairs(self.panels) do
         local evCopy = Utils.copy(event,nil)
         panel:updateMouseEvent(evCopy)
@@ -66,6 +69,7 @@ end
 function Panel:updateMouseEvent(event)
     if event then
         if event.x >= self.x_offset and event.y >= self.y_offset and event.x <= self.x_offset + self.x_size and event.y <= self.y_offset + self.y_size then
+            self.hasMouseLeft = false
             --if #self.panels == 0 then
             --    print(event.type)
             --end
@@ -79,15 +83,19 @@ function Panel:updateMouseEvent(event)
                 panel:updateMouseEvent(evCopy)
             end
             self:onMouseEvent(event)
-        else
+        elseif self.isFireMouseLeftEvent and self.hasMouseLeft == false then
             self:fireMouseLeftEvent(event)
         end
-    else
+    elseif self.isFireMouseLeftEvent and self.hasMouseLeft == false then
         self:fireMouseLeftEvent(event)
     end
 end
  
 function Panel:onMouseEvent(event)
+    --Utils.printTableKeyValues(event)
+    -- if event and event.type then
+    --     print(self.name .. ' - ' .. event.type)
+    -- end
 end
 
 -- Draw Panel Content using cairo

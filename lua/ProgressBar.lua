@@ -11,6 +11,7 @@ function ProgressBar:new(config)
     -- First call Panel constructor
     local self = ProgressBar.super.new(self, config) -- call Panel:new
     
+    self.isFireMouseLeftEvent = true
     self.draw_border = config and config.draw_border or false -- be aware that booleans cant be set to false like this, so it's the default
     self.border_type = config and config.border_type or "plot-both"
     self.border_line_props = config and config.border_line_props or Utils.getLineProps("#3B5969FF")
@@ -33,6 +34,7 @@ function ProgressBar:new(config)
 end
 
 function ProgressBar:onMouseEvent(event)
+    ProgressBar.super.onMouseEvent(self,event)
     if event.type == "mouse_enter" or event.type == "mouse_move" then
         self.hovered = true
     end

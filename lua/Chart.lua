@@ -11,6 +11,7 @@ function Chart:new(config)
     -- First call Panel constructor
     local self = Chart.super.new(self, config) -- call Panel:new
     
+    self.isFireMouseLeftEvent = true
     self.show_time_indicator = config and config.show_time_indicator or false
     self.border_type = config and config.border_type or "plot-both"
     
@@ -257,6 +258,7 @@ function Chart:draw_to_buffer()
 end
 
 function Chart:onMouseEvent(event)
+    Chart.super.onMouseEvent(self,event)
     if self and event and event.type and event.type == "mouse_leave" then
         self.lastMouseEvent = nil
     end

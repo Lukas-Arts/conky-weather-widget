@@ -354,10 +354,14 @@ function conky_weather_widget_mouse_hook(event)
     lastMouseEvent = event
 
     if init_done == true then
-        local evCopy = Utils.copy(lastMouseEvent,nil)
-        dailyWeatherChartPanel:updateMouseEvent(evCopy) 
-        local evCopy2 = Utils.copy(lastMouseEvent,nil)
-        weeklyWeatherChartPanel:updateMouseEvent(evCopy2) 
+        if showDaily then
+            local evCopy = Utils.copy(lastMouseEvent,nil)
+            dailyWeatherChartPanel:updateMouseEvent(evCopy) 
+        end
+        if showWeekly then
+            local evCopy2 = Utils.copy(lastMouseEvent,nil)
+            weeklyWeatherChartPanel:updateMouseEvent(evCopy2) 
+        end
         local evCopy3 = Utils.copy(lastMouseEvent,nil)
         buttonDaily:updateMouseEvent(evCopy3) 
         local evCopy4 = Utils.copy(lastMouseEvent,nil)
