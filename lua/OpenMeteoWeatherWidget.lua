@@ -121,7 +121,7 @@ function getPadding(includeWeekly)
 end
 
 function toggleChart(button)
-    print(button.text)
+    -- print(button.text)
     button.selected = not button.selected
 
     -- padding is weird
@@ -158,7 +158,7 @@ function toggleChart(button)
     end
 end
 function toggleRadarPlay(button)
-    print(button.text)
+    -- print(button.text)
     button.selected = not button.selected
 
     if button.name == "ButtonPausePlay" then
@@ -179,12 +179,12 @@ function toggleRadarPlay(button)
     end
 end
 function toggleRadarStop(button)
-    print(button.text)
+    -- print(button.text)
     button.selected = not button.selected
 
     if button.name == "ButtonStop" then
         if button.selected then
-            print("Set stopRadar to true")
+            -- print("Set stopRadar to true")
             button.text = '■'
             stopRadar = true
             if not buttonPausePlay.selected then
@@ -197,7 +197,7 @@ function toggleRadarStop(button)
     end
 end
 function toggleRadarSpeed(button)
-    print(button.text)
+    -- print(button.text)
 
     if button.name == "ButtonSpeed" then
         if button.text == "x0,25" then
@@ -209,19 +209,19 @@ function toggleRadarSpeed(button)
         elseif button.text == "x1,0" then
             button.text = 'x0,5'
             radarSpeed = 0.5
-            print(button.text)
+            -- print(button.text)
         end
     end
 end
 function setRadarProgress(button,x,y)
-    print(button.name)
+    -- print(button.name)
 
     if button.name == "ProgressBarRadar" then
         local step = (button.x_size - 1)/(button.max_progress - 1)
         local nextIndex = math.floor(((x + (step/2) - button.x_offset))/step) + 1
         currentRadarImage = nextIndex
         progressBarRadar.current_progress = currentRadarImage
-        print(tostring(nextIndex))
+        -- print(tostring(nextIndex))
         if buttonPausePlay.selected == false then
             toggleRadarPlay(buttonPausePlay)
         end
@@ -321,10 +321,8 @@ function update_radar_frames()
     -- load new frame surfaces
     local frame_files = Utils.scandir(frame_dir)
     for i, frame_path in ipairs(frame_files) do
-
-        print(frame_path)
+        -- print(frame_path)
         local image = cairo_image_surface_create_from_png(frame_dir .. frame_path)
-
         table.insert(frames, image)
     end
 

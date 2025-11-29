@@ -60,11 +60,11 @@ function Button:onMouseEvent(event)
         self.clicked = false
     end
     if event.type == "button_down" then
-        print('button down! clicked ' .. tostring(self.clicked))
+        -- print('button down! clicked ' .. tostring(self.clicked))
         self.clicked = true
     end
     if event.type == "button_up" then
-        print('button up! clicked ' .. tostring(self.clicked))
+        -- print('button up! clicked ' .. tostring(self.clicked))
         if self.clicked == true then
             self:handleClick(event.x,event.y)
         end

@@ -41,11 +41,11 @@ function ProgressBar:onMouseEvent(event)
         self.clicked = false
     end
     if event.type == "button_down" then
-        print('ProgressBar down! clicked ' .. tostring(self.clicked))
+        -- print('ProgressBar down! clicked ' .. tostring(self.clicked))
         self.clicked = true
     end
     if event.type == "button_up" then
-        print('ProgressBar up! clicked ' .. tostring(self.clicked))
+        -- print('ProgressBar up! clicked ' .. tostring(self.clicked))
         if self.clicked == true then
             self:handleClick(event.x,event.y)
         end
@@ -54,7 +54,7 @@ function ProgressBar:onMouseEvent(event)
 end
 
 function ProgressBar:handleClick(x,y)
-    print("handle progress bar")
+    -- print("handle progress bar")
     if self.onProgressBarClicked then
         self.onProgressBarClicked(self,x,y)
     end
