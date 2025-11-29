@@ -1,0 +1,141 @@
+package.path = package.path .. string.format(';%s/.conky/weather-widget/lua/?.lua',os.getenv("HOME"))
+local Utils  = require("Utils")
+
+-- Define the Panel "class"
+local Panel = {}
+Panel.__index = Panel
+
+-- Constructor
+function Panel:new(config)
+    local self = setmetatable({}, self)
+    
+    self.x_offset = config and config.x_offset or 0
+    self.y_offset = config and config.y_offset or 0
+    self.x_size   = config and config.x_size or 100
+    self.y_size   = config and config.y_size or 100
+    self.lastMouseEvent = nil
+
+    self.background = config and config.background or nil
+    self.name = config and config.name or 'Panel'
+    
+    self.panels = {}
+    
+    return self
+end
+
+-- Helper: set offset
+function Panel:set_offset(x_off, y_off)
+    self.x_offset = tonumber(x_off)
+    self.y_offset = tonumber(y_off)
+end
+
+-- Helper: set size
+function Panel:set_size(x_s, y_s)
+    self.x_size = tonumber(x_s)
+    self.y_size = tonumber(y_s)
+end
+
+-- Add a new panel
+function Panel:add_panel(panel)
+    table.insert(self.panels, panel)
+end
+
+-- Removes a panel, but does not destroy it
+function Panel:remove_panel(panel)
+    if panel == nil then
+        return
+    end
+    local index = Utils.indexOf(self.panels,panel)
+    self.panels[index] = nil
+end
+
+function Panel:fireMouseLeftEvent(event)
+    for _, panel in ipairs(self.panels) do
+        local evCopy = Utils.copy(event,nil)
+        panel:updateMouseEvent(evCopy)
+    end
+    if event == nil then
+        event = { x = -1, y = -1, type = "mouse_leave" }
+    else
+        event.type = "mouse_leave"
+    end
+    self:onMouseEvent(event)
+end
+
+-- Update Mouse-Events 
+function Panel:updateMouseEvent(event)
+    if event then
+        if event.x >= self.x_offset and event.y >= self.y_offset and event.x <= self.x_offset + self.x_size and event.y <= self.y_offset + self.y_size then
+            --if #self.panels == 0 then
+            --    print(event.type)
+            --end
+            -- print('Mouse in ' .. self.name .. " type " .. event.type)
+            if self.lastMouseEvent == nil and event.type == "mouse_move" then
+                event.type = "mouse_enter"
+            end
+            self.lastMouseEvent = event
+            for _, panel in ipairs(self.panels) do
+                local evCopy = Utils.copy(event,nil)
+                panel:updateMouseEvent(evCopy)
+            end
+            self:onMouseEvent(event)
+        else
+            self:fireMouseLeftEvent(event)
+        end
+    else
+        self:fireMouseLeftEvent(event)
+    end
+end
+ 
+function Panel:onMouseEvent(event)
+end
+
+-- Draw Panel Content using cairo
+-- Use this method to actually draw. 
+-- Call .draw(cr) for Children, to correctly handle Mouse-Events
+function Panel:draw_content(cr)
+    if self.background then
+        local r, g, b, a = Utils.hex2rgb(self.background)
+        cairo_set_source_rgba(cr, r, g, b, a)
+        cairo_rectangle(cr, self.x_offset, self.y_offset, self.x_size, self.y_size)
+        
+        cairo_fill(cr)
+        cairo_stroke(cr)
+    end
+
+    for _, panel in ipairs(self.panels) do
+        panel:draw(cr)
+    end
+end
+
+-- Draw Panel using cairo
+-- Don't use this method to actually draw. 
+-- Call .draw(cr) for Children, to correctly handle Mouse-Events
+function Panel:draw(cr)
+    self:draw_content(cr)
+end
+
+-- destroy Panel
+function Panel:destroy()
+    -- Clear all points and properties in each line
+    if self.panels then
+        for i, panel in ipairs(self.panels) do
+            panel:destroy()
+            self.panels[i] = nil
+        end
+    end
+    self.panels = nil
+
+    -- Clear other fields
+    self.x_offset = nil
+    self.y_offset = nil
+    self.x_size   = nil
+    self.y_size   = nil
+    self.lastMouseEvent = nil
+
+    -- Drop metatable so the GC can fully release it
+    setmetatable(self, nil)
+end
+
+return Panel
+

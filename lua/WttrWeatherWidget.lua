@@ -1,5 +1,6 @@
 
 package.path = package.path .. string.format(';%s/.conky/weather-widget/lua/?.lua',os.getenv("HOME"))
+local json  = require("json")
 local cairo = require 'cairo'
 local Chart = require 'Chart'
 local Utils  = require("Utils")
@@ -45,9 +46,12 @@ function add_8_hours_forecast(hourly_tempC,hourly_perticipprob,hourly_humidity)
 
     local minmax = { min = 0, max = 100 }
     local scaling = chart:get_scaling(minmax, #hourly_perticipprob, 10)
-    chart:add_scaled_series(hourly_humidity, chart:get_properties("#3B596988"), scaling)
-    local probs = chart:get_properties("#88550066")
-    chart:add_scaled_series(hourly_perticipprob, probs, scaling)
+    local props = chart:get_properties("#3B596988")
+    props.scale_props = scaling
+    chart:add_scaled_series(hourly_humidity, props)
+    local props2 = chart:get_properties("#88550066")
+    props2.scale_props = scaling
+    chart:add_scaled_series(hourly_perticipprob, props2)
 
     local polyprops = {
         color = "#3B596988", thickness = 1, antialiasing = false,
@@ -78,9 +82,12 @@ function add_2_days_forecast(hourly_tempC,hourly_perticipprob,hourly_humidity)
 
     local minmax = { min = 0, max = 100 }
     local scaling = chart:get_scaling(minmax, #hourly_perticipprob, 10)
-    chart:add_scaled_series(hourly_humidity, chart:get_properties("#3B596988"), scaling)
-    local probs = chart:get_properties("#88550066")
-    chart:add_scaled_series(hourly_perticipprob, probs, scaling)
+    local props = chart:get_properties("#3B596988")
+    props.scale_props = scaling
+    chart:add_scaled_series(hourly_humidity, props)
+    local props2 = chart:get_properties("#88550066")
+    props2.scale_props = scaling
+    chart:add_scaled_series(hourly_perticipprob, props2)
 
     local polyprops = {
         color = "#3B596988", thickness = 1, antialiasing = false,
@@ -197,6 +204,14 @@ function update()
     add_2_days_forecast(temps.right,perticipprobs.right,humidities.right)
 end
 
+function conky_weather_widget_mouse_hook(event)
+
+    for _,chart in ipairs(my_charts) do
+        local evCopy = Utils.copy(event,nil)
+        chart:updateMouseEvent(evCopy)
+    end
+end
+
 function conky_draw_weather_widget()
     if conky_window == nil then return end
     
@@ -220,7 +235,7 @@ function conky_draw_weather_widget()
         Utils.drawText(cr, 10,50,"Unable to fetch WeatherInfo from wttr.in!",Utils.getFont("#993737",14))
     else
         for _,chart in ipairs(my_charts) do
-            chart:draw_chart(cr) 
+            chart:draw(cr) 
         end
 
         local current_condition = last_json.current_condition[1]

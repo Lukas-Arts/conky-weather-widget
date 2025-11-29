@@ -24,7 +24,7 @@ You can choose between wttr.in and open-meteo.com as Providers for the Weather D
 
 ### wttr.in
 
-`wttr.in` tries to fetch the right Weather Info based on you IP by default. If that isn't sufficient, you can add the Location in the `weather.conky` like so: 
+`wttr.in` tries to fetch the right Weather Info based on you IP by default. If that isn't sufficient, you can add the Location at the end of the `texecpi`-command. To use the widget, edit the `weather.conky`: 
 
     lua_load = '~/.conky/weather-widget/lua/WttrWeatherWidget.lua'
 

@@ -30,13 +30,13 @@ function Utils.getDateFromDateTime(time,baseTimeString)
     if not hours then
         error('could not parse time "' .. time .. '"')
     end
-    timeDate.year = years
-    timeDate.month = months
-    timeDate.day = days
+    timeDate.year = tonumber(years)
+    timeDate.month = tonumber(months)
+    timeDate.day = tonumber(days)
     timeDate.yday = nil
     timeDate.wday = nil
-    timeDate.hour = hours
-    timeDate.min = minutes
+    timeDate.hour = tonumber(hours)
+    timeDate.min = tonumber(minutes)
     
     local convertedTimestamp = os.time(timeDate)
     return convertedTimestamp
@@ -79,14 +79,14 @@ function Utils.hex2rgb(hex)
 end
 
 function Utils.getFont(colorHex,size,fontName,weight,slant)
-    local font = { colorHex = colorHex or "#3B5969FF", size = size or 10, name = fontName or "Droid Sans", weight = weight or CAIRO_FONT_WEIGHT_NORMAL, slant = slant or CAIRO_FONT_SLANT_NORMAL }
+    local font = { colorHex = colorHex or "#3B5969FF", size = size or 10, name = fontName or "DejaVu Sans", weight = weight or CAIRO_FONT_WEIGHT_NORMAL, slant = slant or CAIRO_FONT_SLANT_NORMAL }
     return font
 end
 
 -- x, y are the bottom left coordinates of the text
 function Utils.drawText(cr,x,y,text,font)
     local font = font or Utils.getFont()
-    r, g, b, a = Utils.hex2rgb(font.colorHex)
+    local r, g, b, a = Utils.hex2rgb(font.colorHex)
     cairo_set_source_rgba(cr, r, g, b, a)
     cairo_select_font_face(cr, font.name, font.slant, font.weight)
     cairo_set_font_size(cr, font.size)           -- font size
@@ -117,11 +117,7 @@ function Utils.drawBox(cr,x,y,width,height,lineProps)
     cairo_set_source_rgba(cr, r, g, b, a)
     cairo_set_antialias(cr, lineProps.antialiasing)
     cairo_set_line_width(cr, lineProps.thickness)
-    cairo_move_to(cr, x,y)
-    cairo_line_to(cr, x+width+1,y)
-    cairo_line_to(cr, x+width+1,y+height+1)
-    cairo_line_to(cr, x,y+height+1)
-    cairo_close_path(cr)
+    cairo_rectangle(cr, x+0.5, y+0.5, width, height)
     cairo_stroke(cr)
 end
 
@@ -142,7 +138,6 @@ function Utils.draw_scaled_image_surface(cr, image_surface, x, y, w, h)
 end
 
 function Utils.draw_scaled_image(cr, image_file_path, x, y, w, h)
-
     local image = cairo_image_surface_create_from_png(image_file_path)
     Utils.draw_scaled_image_surface(cr,image,x,y,w,h)
     cairo_surface_destroy(image)
@@ -160,17 +155,6 @@ function Utils.scandir(directory)
     end
     pfile:close()
     return t
-end
-
--- function to preload all icons
--- iconList is a table of {iconCode = "path/to/icon.png"}
-function Utils.loadIcons(iconList,iconCache)
-    for iconCode, filePath in pairs(iconList) do
-        -- load the PNG into a cairo image surface
-        local surface = cairo_image_surface_create_from_png(filePath)
-        -- store it in the cache
-        iconCache[iconCode] = surface
-    end
 end
 
 function Utils.getWeatherIconPath(iconCode,icon_suffix)
@@ -317,12 +301,32 @@ function Utils.printTableKeyValues(t)
     end
 end
 
+function Utils.copy(obj, seen)
+  if type(obj) ~= 'table' then return obj end
+  if seen and seen[obj] then return seen[obj] end
+  local s = seen or {}
+  local res = setmetatable({}, getmetatable(obj))
+  s[obj] = res
+  for k, v in pairs(obj) do res[Utils.copy(k, s)] = Utils.copy(v, s) end
+  return res
+end
+
 function Utils.copyTable(t)
     local t2 = {}
     for k,v in pairs(t) do
         t2[k] = v
     end
     return t2
+end
+
+-- Return the first index with the given value (or nil if not found).
+function Utils.indexOf(array, value)
+    for i, v in ipairs(array) do
+        if v == value then
+            return i
+        end
+    end
+    return nil
 end
 
 function Utils.split_table(t, index)
