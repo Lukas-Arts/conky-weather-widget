@@ -66,7 +66,7 @@ function Panel:fireMouseLeftEvent(event)
     if event == nil then
         ev = { x = -1, y = -1, type = "mouse_leave" }
     else
-        ev = { x = event.x, y = event.y, type = "mouse_enter" }
+        ev = { x = event.x, y = event.y, type = "mouse_leave" }
     end
     self:onMouseEvent(ev)
 end
