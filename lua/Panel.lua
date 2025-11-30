@@ -45,24 +45,30 @@ end
 -- Removes a panel, but does not destroy it
 function Panel:remove_panel(panel)
     if panel == nil then
+        print("Can't remove nil Panel!")
         return
     end
     local index = Utils.indexOf(self.panels,panel)
-    self.panels[index] = nil
+    if index then
+        table.remove(self.panels, index)
+    else
+        print("Item not found!")
+    end
 end
 
 function Panel:fireMouseLeftEvent(event)
     self.hasMouseLeft = true
+    local ev = event
     for _, panel in ipairs(self.panels) do
-        local evCopy = Utils.copy(event,nil)
-        panel:updateMouseEvent(evCopy)
+        panel:updateMouseEvent(ev)
     end
+
     if event == nil then
-        event = { x = -1, y = -1, type = "mouse_leave" }
+        ev = { x = -1, y = -1, type = "mouse_leave" }
     else
-        event.type = "mouse_leave"
+        ev = { x = event.x, y = event.y, type = "mouse_enter" }
     end
-    self:onMouseEvent(event)
+    self:onMouseEvent(ev)
 end
 
 -- Update Mouse-Events 
@@ -70,17 +76,15 @@ function Panel:updateMouseEvent(event)
     if event then
         if event.x >= self.x_offset and event.y >= self.y_offset and event.x <= self.x_offset + self.x_size and event.y <= self.y_offset + self.y_size then
             self.hasMouseLeft = false
-            --if #self.panels == 0 then
-            --    print(event.type)
-            --end
+            
+            local ev = event
             -- print('Mouse in ' .. self.name .. " type " .. event.type)
-            if self.lastMouseEvent == nil and event.type == "mouse_move" then
-                event.type = "mouse_enter"
+            if self.lastMouseEvent == nil or self.lastMouseEvent.type == "mouse_leave" and event.type == "mouse_move" then
+                ev = { x = event.x, y = event.y, type = "mouse_enter" }
             end
-            self.lastMouseEvent = event
+            self.lastMouseEvent = ev
             for _, panel in ipairs(self.panels) do
-                local evCopy = Utils.copy(event,nil)
-                panel:updateMouseEvent(evCopy)
+                panel:updateMouseEvent(ev)
             end
             self:onMouseEvent(event)
         elseif self.isFireMouseLeftEvent and self.hasMouseLeft == false then

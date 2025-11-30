@@ -17,6 +17,9 @@ function WeeklyWeatherChartPanel:new(config)
     self.forecast2_minmax = { min = 0, max = 100 }
     self.name = 'WeeklyWeatherChartPanel'
 
+    self.font1 = Utils.getFont("#3B5969FF",8)
+    self.font2 = Utils.getFont("#3B5969FF",7)
+
     return self
 end
 
@@ -25,6 +28,7 @@ function WeeklyWeatherChartPanel:update(last_json)
     if self.chart then
         self:remove_panel(self.chart)
         self.chart:destroy()
+        self.chart = nil
     end
     self.last_json = last_json
     
@@ -82,35 +86,38 @@ function WeeklyWeatherChartPanel:draw_content(cr)
         step = 350/143
         for i=0,143,1 do
             if i%12==0 then
+                local hourlyIndex = i+25
+                local cStep = i*step
+
                 if i%24==0 then
-                    Utils.drawLine(cr,25+i*step,chart2Start + 50,0,5)
+                    Utils.drawLine(cr,25+cStep,chart2Start + 50,0,5)
                 else
-                    local dayOfWeekString = Utils.getDayOfWeekStringShort(os.date("%w",Utils.getDateFromDateTime(self.last_json.hourly.time[i+25])))
-                    Utils.drawText(cr, 20+i*step,chart2Start + 63,dayOfWeekString)
+                    local dayOfWeekString = Utils.getDayOfWeekStringShort(os.date("%w",Utils.getDateFromDateTime(self.last_json.hourly.time[hourlyIndex])))
+                    Utils.drawText(cr, 20+cStep,chart2Start + 63,dayOfWeekString)
                 end
                 --Utils.drawText(cr, 200,chart2Start + 65,"|")
-                
-                is_day = self.last_json.hourly.is_day[i+25] == 1
+
+                is_day = self.last_json.hourly.is_day[hourlyIndex] == 1
                 dayNightString = "d"
                 if not is_day then
                     dayNightString = "n"
                 end
 
-                local imagePath = Utils.getWMOIconPath(self.last_json.hourly.weather_code[i+25],dayNightString .. "_t@0.5x-blue")
+                local imagePath = Utils.getWMOIconPath(self.last_json.hourly.weather_code[hourlyIndex],dayNightString .. "_t@0.5x-blue")
                 local image = getImage(imagePath)
-                Utils.draw_scaled_image_surface(cr,image,14+i*step,chart2Start + 63,25,25)
+                Utils.draw_scaled_image_surface(cr,image,14+cStep,chart2Start + 63,25,25)
 
-                local val = tonumber(self.last_json.hourly.temperature_2m[i+25])
-                local val2 = tonumber(self.last_json.hourly.apparent_temperature[i+25])
+                local val = tonumber(self.last_json.hourly.temperature_2m[hourlyIndex])
+                local val2 = tonumber(self.last_json.hourly.apparent_temperature[hourlyIndex])
                 if val >= 10 then
-                    Utils.drawText(cr, 17+i*step,chart2Start + 95,string.format("%1.f°C",val),Utils.getFont("#3B5969FF",8))
+                    Utils.drawText(cr, 17+cStep,chart2Start + 95,string.format("%1.f°C",val),self.font1)
                 else
-                    Utils.drawText(cr, 19+i*step,chart2Start + 95,string.format("%1.f°C",val),Utils.getFont("#3B5969FF",8))
+                    Utils.drawText(cr, 19+cStep,chart2Start + 95,string.format("%1.f°C",val),self.font1)
                 end
                 if val2 >= 10 then
-                    Utils.drawText(cr, 17+i*step,chart2Start + 105,string.format("(%1.f°C)",val2),Utils.getFont("#3B5969FF",7))
+                    Utils.drawText(cr, 17+cStep,chart2Start + 105,string.format("(%1.f°C)",val2),self.font2)
                 else
-                    Utils.drawText(cr, 20+i*step,chart2Start + 105,string.format("(%1.f°C)",val2),Utils.getFont("#3B5969FF",7))
+                    Utils.drawText(cr, 20+cStep,chart2Start + 105,string.format("(%1.f°C)",val2),self.font2)
                 end
             end
         end
@@ -120,12 +127,21 @@ function WeeklyWeatherChartPanel:draw_content(cr)
 end
 
 function WeeklyWeatherChartPanel:destroy()
+
+    if self.chart then
+        self:remove_panel(self.chart)
+        self.chart:destroy()
+    end
+
     self.last_json = nil
+
+    self.font1 = nil
+    self.font2 = nil
     self.chart = nil
     self.forecast2_minmax = nil
     self.name = nil
 
-    Chart.destroy(self)
+    Panel.destroy(self)
 end
 
 return WeeklyWeatherChartPanel

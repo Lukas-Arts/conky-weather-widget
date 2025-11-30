@@ -295,13 +295,13 @@ function Chart:draw_content(cr)
         
         cairo_stroke(cr)
     end
-    if self.lastMouseEvent then
+    if self.lastMouseEvent and self.hasMouseLeft == false then
         local y_mouse_override = 0
         local mouse_value = 0
 
         for _, line in ipairs(self.lines) do
             if #line.points > 0 then
-                if line.props.idicate_input and self.lastMouseEvent then
+                if line.props.idicate_input then
                     -- print("Getting val for mouse Event")
                     local pindex = math.floor(((#line.points - 1) / self.x_size) * (self.lastMouseEvent.x - self.x_offset)) + 1
                     -- print(tostring(pindex))
@@ -358,6 +358,11 @@ function Chart:destroy()
     self.border_type = nil
     self.show_time_indicator = nil
 
+    if self.buffered_chart_image then
+        cairo_surface_destroy(self.buffered_chart_image)
+        self.buffered_chart_image = nil
+    end
+    
     Panel.destroy(self)
 end
 

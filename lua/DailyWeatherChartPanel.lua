@@ -17,6 +17,8 @@ function DailyWeatherChartPanel:new(config)
     self.forecast1_minmax = { min = 0, max = 100 }
     self.name = 'DailyWeatherChartPanel'
 
+    self.font1 = Utils.getFont("#3B5969FF",8)
+
     return self
 end
 
@@ -25,6 +27,7 @@ function DailyWeatherChartPanel:update(last_json)
     if self.chart then
         self:remove_panel(self.chart)
         self.chart:destroy()
+        self.chart = nil
     end
     self.last_json = last_json
 
@@ -94,43 +97,45 @@ function DailyWeatherChartPanel:draw_content(cr)
         local mod = 0
         for i=0,95,1 do
             local hourIndex = 0
+            local minutelyIndex = i+1
+            local cStep = i*step
             for j=1,#self.last_json.hourly.time+1,1 do
-                if self.last_json.minutely_15.time[i+1]==self.last_json.hourly.time[j] then
+                if self.last_json.minutely_15.time[minutelyIndex]==self.last_json.hourly.time[j] then
                     hourIndex = j
 
-                    Utils.drawLine(cr,25+i*step,chart1Start + 50,0,hourIndex%2 == 1 and 5 or 3)
+                    Utils.drawLine(cr,25+cStep,chart1Start + 50,0,hourIndex%2 == 1 and 5 or 3)
 
                     if hourIndex%2 == 1 then
                         local hour_then = hourIndex % 24
 
-                        local is_day = self.last_json.minutely_15.is_day[i+1] == 1
+                        local is_day = self.last_json.minutely_15.is_day[minutelyIndex] == 1
                         local dayNightString = "d"
                         if not is_day then
                             dayNightString = "n"
                         end
                         
                         if hour_then > 10 then
-                            Utils.drawText(cr, 15+i*step,chart1Start + 65,string.format("%dh",hour_then))
+                            Utils.drawText(cr, 15+cStep,chart1Start + 65,string.format("%dh",hour_then))
                         else
-                            Utils.drawText(cr, 18+i*step,chart1Start + 65,string.format("%dh",hour_then))
+                            Utils.drawText(cr, 18+cStep,chart1Start + 65,string.format("%dh",hour_then))
                         end
 
-                        local imagePath = Utils.getWMOIconPath(self.last_json.minutely_15.weather_code[i+1],dayNightString .. "_t@1x-blue")
+                        local imagePath = Utils.getWMOIconPath(self.last_json.minutely_15.weather_code[minutelyIndex],dayNightString .. "_t@1x-blue")
                         local image = getImage(imagePath)
-                        Utils.draw_scaled_image_surface(cr,image,6+i*step,2+chart1Start + 60,38,38)
+                        Utils.draw_scaled_image_surface(cr,image,6+cStep,2+chart1Start + 60,38,38)
 
 
-                        local val = tonumber(self.last_json.minutely_15.temperature_2m[i+1])
+                        local val = tonumber(self.last_json.minutely_15.temperature_2m[minutelyIndex])
                         local val2 = tonumber(self.last_json.hourly.apparent_temperature[hourIndex])
                         if val >= 10 then
-                            Utils.drawText(cr, 13+i*step,chart1Start + 107,string.format("%1.f°C",val))
+                            Utils.drawText(cr, 13+cStep,chart1Start + 107,string.format("%1.f°C",val))
                         else
-                            Utils.drawText(cr, 16+i*step,chart1Start + 107,string.format("%1.f°C",val))
+                            Utils.drawText(cr, 16+cStep,chart1Start + 107,string.format("%1.f°C",val))
                         end
                         if val2 >= 10 then
-                            Utils.drawText(cr, 13+i*step,chart1Start + 120,string.format("(%1.f°C)",val2),Utils.getFont("#3B5969FF",8))
+                            Utils.drawText(cr, 13+cStep,chart1Start + 120,string.format("(%1.f°C)",val2),self.font1)
                         else
-                            Utils.drawText(cr, 16+i*step,chart1Start + 120,string.format("(%1.f°C)",val2),Utils.getFont("#3B5969FF",8))
+                            Utils.drawText(cr, 16+cStep,chart1Start + 120,string.format("(%1.f°C)",val2),self.font1)
                         end
                     end
                     break
@@ -143,12 +148,20 @@ function DailyWeatherChartPanel:draw_content(cr)
 end
 
 function DailyWeatherChartPanel:destroy()
+
+    if self.chart then
+        self:remove_panel(self.chart)
+        self.chart:destroy()
+    end
+    
     self.last_json = nil
+
+    self.font1 = nil
     self.chart = nil
     self.forecast1_minmax = nil
     self.name = nil
 
-    Chart.destroy(self)
+    Panel.destroy(self)
 end
 
 return DailyWeatherChartPanel

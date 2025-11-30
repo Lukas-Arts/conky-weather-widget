@@ -7,15 +7,15 @@ function Utils.getDateFromTime(time,baseTimeString)
     local baseDate = os.date('*t',baseTimeString)
     local timeDate = Utils.copyTable(baseDate)
     
-    local hours, minutes, amPm = time:match("^(%d%d):(%d%d) ([AP]M)$")
+    local hours, minutes, amPm = time:match("^(%d?%d):(%d%d) ([AP]M)$")
     if not hours then
         error('could not parse time "' .. time .. '"')
     end
     if amPm == 'PM' then
-        hours = string.format('%2d', tonumber(hours) + 12)
+        hours = tonumber(hours) + 12
     end
-    timeDate.hour = hours
-    timeDate.min = minutes
+    timeDate.hour = tonumber(hours)
+    timeDate.min = tonumber(minutes)
     
     local convertedTimestamp = os.time(timeDate)
     return convertedTimestamp
@@ -77,10 +77,13 @@ function Utils.hex2rgb(hex)
     local a = tonumber("0x"..(hex:sub(7,8) or "FF")) / 255
     return r, g, b, a
 end
-
+local DEFAULT_FONT = { colorHex="#3B5969FF", size=10, name="DejaVu Sans",
+                       weight=CAIRO_FONT_WEIGHT_NORMAL, slant=CAIRO_FONT_SLANT_NORMAL }
 function Utils.getFont(colorHex,size,fontName,weight,slant)
-    local font = { colorHex = colorHex or "#3B5969FF", size = size or 10, name = fontName or "DejaVu Sans", weight = weight or CAIRO_FONT_WEIGHT_NORMAL, slant = slant or CAIRO_FONT_SLANT_NORMAL }
-    return font
+    if not colorHex and not size and not fontName then
+        return DEFAULT_FONT
+    end
+    return { colorHex = colorHex or "#3B5969FF", size = size or 10, name = fontName or "DejaVu Sans", weight = weight or CAIRO_FONT_WEIGHT_NORMAL, slant = slant or CAIRO_FONT_SLANT_NORMAL }
 end
 
 -- x, y are the bottom left coordinates of the text
@@ -122,6 +125,9 @@ function Utils.drawBox(cr,x,y,width,height,lineProps)
 end
 
 function Utils.draw_scaled_image_surface(cr, image_surface, x, y, w, h)
+    if not image_surface then
+        return
+    end
 
     local img_w = cairo_image_surface_get_width(image_surface)
     local img_h = cairo_image_surface_get_height(image_surface)

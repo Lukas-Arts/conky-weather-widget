@@ -44,6 +44,10 @@ function Button:set_text(text)
 end
 
 function Button:set_text_extents(cr)
+    if self.text_extents then
+        cairo_text_extents_destroy(self.text_extents)
+    end
+
     cairo_select_font_face(cr, self.font.name, self.font.slant, self.font.weight)
     cairo_set_font_size(cr, self.font.size)           -- font size
     local extents = cairo_text_extents_t:create()
@@ -96,7 +100,11 @@ function Button:draw_content(cr)
         lineProps = self.border_clicked_line_props
     end
 
-    self.font.colorHex = lineProps.colorHex
+    self.font = { colorHex=lineProps.colorHex, size=self.font.size, name=self.font.name,
+                       weight=self.font.weight, slant=self.font.slant }
+    if self.useSelectedAsTextColor and self.selected then
+        self.font.colorHex = self.border_selected_line_props.colorHex
+    end
 
     if self.draw_border == true then
         if self.selected then
@@ -104,9 +112,6 @@ function Button:draw_content(cr)
         end
 
         Utils.drawBox(cr,self.x_offset + 1,self.y_offset + 1,self.x_size - 1,self.y_size - 1,lineProps)
-    end
-    if self.useSelectedAsTextColor and self.selected then
-        self.font.colorHex = self.border_selected_line_props.colorHex
     end
     
     Utils.drawText(cr,self.x_offset + self.x_size/2 - self.text_extents.width/2 + self.text_x_offset,self.y_offset + self.y_size/2 + self.text_extents.height/2 + self.text_y_offset,self.text,self.font)
@@ -121,6 +126,10 @@ function Button:destroy()
     self.name = nil
     self.onButtonClicked = nil
 
+    if self.text_extents then
+        cairo_text_extents_destroy(self.text_extents)
+    end
+    
     Panel.destroy(self)
 end
 

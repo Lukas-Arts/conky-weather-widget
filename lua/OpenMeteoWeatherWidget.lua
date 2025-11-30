@@ -10,7 +10,6 @@ local WeeklyWeatherChartPanel = require('WeeklyWeatherChartPanel')
 local CurrentWeatherInfoPanel = require('CurrentWeatherInfoPanel')
 local Utils  = require("Utils")
 
-
 frame_dir = os.getenv("HOME") .. "/.conky/weather-widget/gif_frames/"
 current_frame_index = 1
 frames = {}
@@ -51,7 +50,6 @@ function getImage(imagePath)
         return icon
     end
 end
-
 
 function draw_radar_image(cr,x,y,width,height)
     -- paint radar image if available
@@ -158,6 +156,7 @@ function toggleChart(button)
         end
     end
 end
+
 function toggleRadarPlay(button)
     -- print(button.text)
     button.selected = not button.selected
@@ -179,6 +178,7 @@ function toggleRadarPlay(button)
         end
     end
 end
+
 function toggleRadarStop(button)
     -- print(button.text)
     button.selected = not button.selected
@@ -197,6 +197,7 @@ function toggleRadarStop(button)
         end
     end
 end
+
 function toggleRadarSpeed(button)
     -- print(button.text)
 
@@ -214,6 +215,7 @@ function toggleRadarSpeed(button)
         end
     end
 end
+
 function setRadarProgress(button,x,y)
     -- print(button.name)
 
@@ -316,32 +318,61 @@ function init()
     init_done = true
 
     -- sync update rate with json/radar update rate
-    local waitSecAfterJSONUpdate = 10
+    local waitSecAfterJSONUpdate = 25
     last_update = tonumber(Utils.read_file(os.getenv("HOME") .. "/.conky/weather-widget/last_update.txt")) + waitSecAfterJSONUpdate
     update()
 end
 
 function update_radar_frames()
     print("Update Radar Frames")
-    -- destroy old frame surfaces
-    for i, frame in ipairs(frames) do
-        cairo_surface_destroy(frame)
-        frames[i] = nil
-    end
-    frames = {}  -- clear whole table
-
-    -- load new frame surfaces
+    -- Get all radar frame files sorted by timestamp
     local frame_files = Utils.scandir(frame_dir)
-    for i, frame_path in ipairs(frame_files) do
-        -- print(frame_path)
-        local image = cairo_image_surface_create_from_png(frame_dir .. frame_path)
-        table.insert(frames, image)
+    table.sort(frame_files)  -- ensure chronological order
+    
+    -- First-time load: populate frames table completely
+    if #frames == 0 then
+        for i, frame_path in ipairs(frame_files) do
+            local image = cairo_image_surface_create_from_png(frame_dir .. frame_path)
+            image.file_name = frame_path
+            table.insert(frames, image)
+        end
+    else
+        -- Subsequent updates: check if new frame(s) exist
+        local last_frame_file = frames[#frames].file_name
+        local new_files_start_index = nil
+        
+        for i, frame_path in ipairs(frame_files) do
+            if frame_path == last_frame_file then
+                new_files_start_index = i + 1
+                break
+            end
+        end
+        
+        -- Load only new frames
+        if new_files_start_index then
+            for i = new_files_start_index, #frame_files do
+                local frame_path = frame_files[i]
+                local image = cairo_image_surface_create_from_png(frame_dir .. frame_path)
+                image.file_name = frame_path
+                table.insert(frames, image)
+            end
+        end
+
+        -- Remove old frames if we exceed the intended max count
+        while #frames > #frame_files do
+            local old_frame = frames[1]
+            cairo_surface_destroy(old_frame)
+            table.remove(frames, 1)
+        end
     end
 
     progressBarRadar.max_progress = #frames
 end
+
 -- Update chart data from JSON file
 function update()
+    print("Update")
+
     local json_text = Utils.read_file(os.getenv("HOME") .. "/.conky/weather-widget/weatherinfo.json")
     if not json_text or json_text == "" then
         print("Error: weatherinfo.json is empty or missing.")
@@ -369,25 +400,17 @@ function conky_weather_widget_mouse_hook(event)
 
     if init_done == true then
         if showDaily then
-            local evCopy = Utils.copy(lastMouseEvent,nil)
-            dailyWeatherChartPanel:updateMouseEvent(evCopy) 
+            dailyWeatherChartPanel:updateMouseEvent(lastMouseEvent) 
         end
         if showWeekly then
-            local evCopy2 = Utils.copy(lastMouseEvent,nil)
-            weeklyWeatherChartPanel:updateMouseEvent(evCopy2) 
+            weeklyWeatherChartPanel:updateMouseEvent(lastMouseEvent) 
         end
-        local evCopy3 = Utils.copy(lastMouseEvent,nil)
-        buttonDaily:updateMouseEvent(evCopy3) 
-        local evCopy4 = Utils.copy(lastMouseEvent,nil)
-        buttonWeekly:updateMouseEvent(evCopy4)
-        local evCopy5 = Utils.copy(lastMouseEvent,nil)
-        buttonPausePlay:updateMouseEvent(evCopy5)
-        local evCopy6 = Utils.copy(lastMouseEvent,nil)
-        buttonStop:updateMouseEvent(evCopy6)
-        local evCopy7 = Utils.copy(lastMouseEvent,nil)
-        progressBarRadar:updateMouseEvent(evCopy7)
-        local evCopy8 = Utils.copy(lastMouseEvent,nil)
-        buttonSpeed:updateMouseEvent(evCopy8)
+        buttonDaily:updateMouseEvent(lastMouseEvent) 
+        buttonWeekly:updateMouseEvent(lastMouseEvent)
+        buttonPausePlay:updateMouseEvent(lastMouseEvent)
+        buttonStop:updateMouseEvent(lastMouseEvent)
+        progressBarRadar:updateMouseEvent(lastMouseEvent)
+        buttonSpeed:updateMouseEvent(lastMouseEvent)
     end
     return false
 end
@@ -430,14 +453,16 @@ function conky_draw_weather_widget()
         if showWeekly then
             weeklyWeatherChartPanel:draw(cr)
         end
+
+        if stopRadar == false then
+            draw_radar_image(cr,10,radar_y,380,380)
+        end
+        progressBarRadar:draw(cr)
     end
 
-    if stopRadar == false then
-        draw_radar_image(cr,10,radar_y,380,380)
-    end
-    progressBarRadar:draw(cr)
-
-    cairo_surface_destroy(cs)
     cairo_destroy(cr)
+    cairo_surface_destroy(cs)
+    
+    -- collectgarbage("collect")
+    -- print("Lua memory (KB):", collectgarbage("count"))
 end
-

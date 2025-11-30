@@ -80,7 +80,9 @@ end
 
 function CurrentWeatherInfoPanel:destroy()
     self.name = nil
-
+    if self.buffered_chart_image then
+        cairo_surface_destroy(self.buffered_chart_image)
+    end
     Panel.destroy(self)
 end
 
