@@ -339,6 +339,10 @@ function Chart:draw_content(cr)
 end
 
 function Chart:destroy()
+    if self.buffered_chart_image then
+        cairo_surface_destroy(self.buffered_chart_image)
+        self.buffered_chart_image = nil
+    end
     -- Clear all points and properties in each line
     if self.lines then
         for i, line in ipairs(self.lines) do
@@ -357,11 +361,6 @@ function Chart:destroy()
     -- Clear other fields
     self.border_type = nil
     self.show_time_indicator = nil
-
-    if self.buffered_chart_image then
-        cairo_surface_destroy(self.buffered_chart_image)
-        self.buffered_chart_image = nil
-    end
     
     Panel.destroy(self)
 end

@@ -379,7 +379,7 @@ function conky_draw_weather_widget()
     draw_radar_image(cr,10,390,380,380)
 
 
-    cairo_surface_destroy(cs)
     cairo_destroy(cr)
+    cairo_surface_destroy(cs)
 end
 
