@@ -1,12 +1,12 @@
 # Conky Weather Widget
 
-A Weather Widget for [Conky](https://github.com/brndnmtthws/conky) using [wttr.in](https://github.com/chubin/wttr.in) or [open-meteo.com](https://open-meteo.com) for Weather-Data and [dwd.de](https://dwd.de) for Rain Radar Images from Germany.
+A Weather Widget for [Conky](https://github.com/brndnmtthws/conky) using [wttr.in](https://github.com/chubin/wttr.in) or [open-meteo.com](https://open-meteo.com) for Weather-Data and [dwd.de](https://dwd.de) for Rain Radar Images from Germany and [EUMETSAT](https://www.eumetsat.int/) for Satellite Images. The widget stays respects the Free Rate Limits of these Services, so no API-Keys are needed.
 
  ![Conky Weather Widget Preview](./weather.conky.png)
 
 The Charts show the baseline Temperature in light blue with an randomly estimated error rate, filled in a darker blue. The orange line indicates the chance of precipitation and the single darker blue line the humidity. The vertical red line shows the current time. 
 
-The Radar Image is shown as an animation of the Images from the last 60 minutes.
+The Radar Image is shown as an animation of the Images from the last 60 minutes in 5min steps. The Satellite animation shows the last 2 Hours in 10min steps.
 
 Icons are based on [OpenWeatherMap Icons](https://github.com/rodrigokamada/openweathermap)
 
@@ -59,7 +59,7 @@ Also edit the `./lua/WttrWeatherWidget.lua` at line 123 & 124 to show a target i
 
 ## Satellite View
 
-For the Satellite View the `get_satellite_image.sh` script gets the latest Image from [EUMETSAT's GeoColour RGB - MTG - 0 degree](https://view.eumetsat.int/productviewer/productDetails/mtg_fd:rgb_geocolour?v=mtg_fd:rgb_geocolour) Product, that combines Satellite Data from ESA with NASA's Black Marble static background. The Source is a geostationary Satellite at 0°, that covers Europe, Africa and parts of the Middle East and South America and produces a new Image every 10 Minutes. I adjusted the API request to show an Image of Europe.
+For the Satellite View the `get_satellite_image.sh` script gets the latest Image from [EUMETSAT's GeoColour RGB - MTG - 0 degree](https://view.eumetsat.int/productviewer/productDetails/mtg_fd:rgb_geocolour?v=mtg_fd:rgb_geocolour) Product, that combines Satellite Data from ESA with NASA's Black Marble static nackground for the night. The Source is a geostationary Satellite at 0°, that covers Europe, Africa and parts of the Middle East and South America and produces a new Image every 10 minutes. I adjusted the API request to show an Image of Europe.
 
 ## Temp Folders and Files
 
