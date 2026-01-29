@@ -24,7 +24,7 @@ else
     #echo "realoading weather data $(date +%T) $my_now  $last_update  $((my_now-last_update))" >> "$HOME/.conky/weather-widget/weather.log"
 
     
-    get_and_crop_radar_log=$($HOME/.conky/weather-widget/get_and_crop_radar_image.sh "hes" "335" "295")
+    get_and_crop_radar_log=$($HOME/.conky/weather-widget/get_and_crop_radar_image.sh "REGION" "DETAIL_VIEW_X" "DETAIL_VIEW_Y")
     
     #echo "no previous update found, or too old. updating weather info..."
     #echo "using $1"
