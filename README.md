@@ -59,7 +59,7 @@ Also edit the `./lua/WttrWeatherWidget.lua` at line 123 & 124 to show a target i
 
 ## Satellite View
 
-For the Satellite View the `get_satellite_image.sh` script gets the latest Image from [EUMETSAT's GeoColour RGB - MTG - 0 degree](https://view.eumetsat.int/productviewer/productDetails/mtg_fd:rgb_geocolour?v=mtg_fd:rgb_geocolour) Product, that combines Satellite Data from ESA with NASA's Black Marble static nackground for the night. The Source is a geostationary Satellite at 0°, that covers Europe, Africa and parts of the Middle East and South America and produces a new Image every 10 minutes. I adjusted the API request to show an Image of Europe.
+For the Satellite View the `get_satellite_image.sh` script gets the latest Image from the [EUMETSAT's GeoColour RGB - MTG - 0 degree](https://view.eumetsat.int/productviewer/productDetails/mtg_fd:rgb_geocolour?v=mtg_fd:rgb_geocolour) Product, that combines Satellite Data from ESA with NASA's Black Marble static background for the night. The Source is a geostationary Satellite at 0°, that covers Europe, Africa and parts of the Middle East and South America and produces a new Image every 10 minutes. I adjusted the API request to show an Image of Europe.
 
 ## Temp Folders and Files
 
