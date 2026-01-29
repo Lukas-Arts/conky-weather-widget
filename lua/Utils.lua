@@ -1,6 +1,12 @@
 -- ~/.conky/weather-widget/lua/Utils.lua
 local Utils = {}
+local socket = require 'socket'
 Utils.__index = Utils
+
+-- wait for sec as a float
+function Utils.sleep(sec)
+    socket.select(nil, nil, sec)
+end
 
 -- time as a timestamp in the format %h:%M %p format, and now in unix seconds
 function Utils.getDateFromTime(time,baseTimeString)
@@ -131,7 +137,6 @@ function Utils.draw_scaled_image_surface(cr, image_surface, x, y, w, h)
 
     local img_w = cairo_image_surface_get_width(image_surface)
     local img_h = cairo_image_surface_get_height(image_surface)
-
     local pattern = cairo_pattern_create_for_surface(image_surface)
     local matrix = cairo_matrix_t:create()
     cairo_matrix_init_scale(matrix, img_w / w, img_h / h)

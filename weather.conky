@@ -71,6 +71,8 @@ conky.config = {
     lua_load = '~/.conky/weather-widget/lua/OpenMeteoWeatherWidget.lua',
     lua_draw_hook_pre = 'conky_draw_weather_widget',
     lua_mouse_hook = 'conky_weather_widget_mouse_hook',
+	lua_startup_hook = 'conky_startup_hook',
+	lua_shutdown_hook = 'conky_shutdown_hook',
 };
 conky.text = [[
 ${goto 10}${color1}${font9}H${font0} Weather

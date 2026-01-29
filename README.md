@@ -57,6 +57,10 @@ Also edit the `./lua/WttrWeatherWidget.lua` at line 123 & 124 to show a target i
     local target_x = %YOUR_HOME_X% + x
     local target_y = %YOUR_HOME_Y% + y
 
+## Satellite View
+
+For the Satellite View the `get_satellite_image.sh` script gets the latest Image from [EUMETSAT's GeoColour RGB - MTG - 0 degree](https://view.eumetsat.int/productviewer/productDetails/mtg_fd:rgb_geocolour?v=mtg_fd:rgb_geocolour) Product, that combines Satellite Data from ESA with NASA's Black Marble static background. The Source is a geostationary Satellite at 0°, that covers Europe, Africa and parts of the Middle East and South America and produces a new Image every 10 Minutes. I adjusted the API request to show an Image of Europe.
+
 ## Temp Folders and Files
 
 You might need to create these Folders for the Radar Images:
@@ -64,6 +68,11 @@ You might need to create these Folders for the Radar Images:
     ./gif_frames
     ./gif_frames_edit
     ./gif_frames_raw
+
+And the Satellite Images:
+
+    ./eu_gif_frames
+    ./eu_gif_frames_raw
 
 And these Files:
 
@@ -73,3 +82,7 @@ And these Files:
 ## Changing the Colors
 
 You can use the `./icons/owm-icons-blue/convert_color.sh`, `./icons/owm-icons-blue/convert_color.sh` and `./icons/arrow/rotate_img.sh` scripts to bulk edit the icon colors. Then edit the `./weather.conky` and `.lua` files in `./lua/`
+
+## AI Disclaimer
+
+I used some AI to check the code for memory leaks and create some parts of the code, since lua is new to me. So there are still memory leaks and the code is bad in many places.

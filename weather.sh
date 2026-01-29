@@ -9,6 +9,12 @@ if [ -f "$HOME/.conky/weather-widget/last_update.txt" ]; then
     last_update=$(cat "$HOME/.conky/weather-widget/last_update.txt")
     #echo "found last_update.txt. last update was: $last_update" >> "$HOME/.conky/weather-widget/weather.log"
 fi
+last_sat_update=0
+if [ -f "$HOME/.conky/weather-widget/last_sat_update.txt" ]; then
+    last_sat_update=$(cat "$HOME/.conky/weather-widget/last_sat_update.txt")
+    #echo "found last_sat_update.txt. last sat update was: $last_sat_update" >> "$HOME/.conky/weather-widget/weather.log"
+fi
+
 my_now=$(date +%s)
 if ((my_now-last_update < 300)) then
     #echo "no update needed. reading old weather info..." >> "$HOME/.conky/weather-widget/weather.log"
@@ -18,7 +24,7 @@ else
     #echo "realoading weather data $(date +%T) $my_now  $last_update  $((my_now-last_update))" >> "$HOME/.conky/weather-widget/weather.log"
 
     
-    get_and_crop_radar_log=$($HOME/.conky/weather-widget/get_and_crop_radar_image.sh "hes")
+    get_and_crop_radar_log=$($HOME/.conky/weather-widget/get_and_crop_radar_image.sh "hes" "335" "295")
     
     #echo "no previous update found, or too old. updating weather info..."
     #echo "using $1"
@@ -37,6 +43,15 @@ else
     last_update=$my_now
     printf "$last_update" > "$HOME/.conky/weather-widget/last_update.txt"
 fi
+
+
+if ((my_now-last_sat_update >= 600)) then
+    get_and_satellite_log=$($HOME/.conky/weather-widget/get_satellite_image.sh)
+    
+    last_sat_update=$my_now
+    printf "$last_sat_update" > "$HOME/.conky/weather-widget/last_sat_update.txt"
+fi
+
 
 if [ -z "$weatherinfo" ]; then
     echo -n "\${color9}Error in Weather-Service!\${color1}"

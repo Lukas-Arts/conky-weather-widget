@@ -11,8 +11,11 @@ local CurrentWeatherInfoPanel = require('CurrentWeatherInfoPanel')
 local Utils  = require("Utils")
 
 frame_dir = os.getenv("HOME") .. "/.conky/weather-widget/gif_frames/"
+eu_frame_dir = os.getenv("HOME") .. "/.conky/weather-widget/eu_gif_frames/"
 current_frame_index = 1
 frames = {}
+current_eu_frame_index = 1
+eu_frames = {}
 last_update = 0
 last_json_update = 0
 last_json = {}
@@ -21,20 +24,24 @@ dailyWeatherChartPanel = nil
 weeklyWeatherChartPanel = nil
 buttonDaily = nil
 buttonWeekly = nil
+buttonImageToggle = nil
 buttonPausePlay = nil
 buttonStop = nil
 buttonSpeed = nil
-progressBarRadar = nil
+progressBarImage = nil
 imageCache = {}
 currentRadarImage = 1
+currentSatelliteImage = 1
+cs = nil
 
 showDaily = true
 showWeekly = false
-playRadar = true
-stopRadar = false
-radarSpeed = 0.5
+showRadarSatellite = false
+playImage = true
+stopImage = false
+imageSpeed = 0.5
 
-radar_y = 265
+image_y = 265
 
 lastMouseEvent = nil
 init_done = false
@@ -51,19 +58,46 @@ function getImage(imagePath)
     end
 end
 
+function draw_satellite_image(cr,x,y,width,height)
+    -- paint radar image if available
+    if eu_frames and #eu_frames > 0 then
+        if buttonPausePlay and buttonPausePlay.selected == false then
+            current_eu_frame_index = (current_eu_frame_index + 1) % (((#eu_frames+1) / imageSpeed))
+            if current_eu_frame_index == 0 then
+                current_eu_frame_index = 1
+            end
+            currentSatelliteImage = math.max(1,math.floor(current_eu_frame_index * imageSpeed))
+        end
+        print("current frame: ",current_eu_frame_index,currentSatelliteImage,#eu_frames,eu_frames[currentSatelliteImage])
+        
+        progressBarImage.current_progress = currentSatelliteImage
+        local current_frame = eu_frames[currentSatelliteImage]
+        
+        -- draw image border
+        Utils.drawBox(cr,x-1,y-1,width+1,height+1)
+        
+        -- print("current: ",current_file)
+        Utils.draw_scaled_image_surface(cr,current_frame,x,y,width,height)
+        
+        
+        --local weatherDate = last_json.current_condition[1].localObsDateTime
+        Utils.drawText(cr, x, y + height + 20,"Last Update: " .. last_json_update .. "                                     Lat: " .. last_json.latitude .. ", Lon: " .. last_json.longitude)
+    end
+end
+
 function draw_radar_image(cr,x,y,width,height)
     -- paint radar image if available
     if frames and #frames > 0 then
         if buttonPausePlay and buttonPausePlay.selected == false then
-            current_frame_index = (current_frame_index + 1) % (((#frames+1) / radarSpeed))
+            current_frame_index = (current_frame_index + 1) % (((#frames+1) / imageSpeed))
             if current_frame_index == 0 then
                 current_frame_index = 1
             end
-            currentRadarImage = math.max(1,math.floor(current_frame_index * radarSpeed))
+            currentRadarImage = math.max(1,math.floor(current_frame_index * imageSpeed))
         end
         -- print("current frame: ",current_frame_index,#frames)
         
-        progressBarRadar.current_progress = currentRadarImage
+        progressBarImage.current_progress = currentRadarImage
         local current_frame = frames[currentRadarImage]
         
         
@@ -71,7 +105,7 @@ function draw_radar_image(cr,x,y,width,height)
         Utils.draw_scaled_image_surface(cr,current_frame,x,y,width,height)
         
         -- draw image border
-        Utils.drawBox(cr,x,y,width,height)
+        Utils.drawBox(cr,x-1,y-1,width+1,height+1)
         
         --draw detailview border
         local r, g, b, a = Utils.hex2rgb("#3B596988")
@@ -130,14 +164,14 @@ function toggleChart(button)
             showDaily = true
 
             weeklyWeatherChartPanel.y_offset = weeklyWeatherChartPanel.y_offset + dailyWeatherChartPanel.y_size + getPadding(false) + 5
-            radar_y = radar_y + dailyWeatherChartPanel.y_size + getPadding(true)
+            image_y = image_y + dailyWeatherChartPanel.y_size + getPadding(true)
             weeklyWeatherChartPanel:update(last_json)
         else
             button.text = 'Show Daily'
             showDaily = false
 
             weeklyWeatherChartPanel.y_offset = weeklyWeatherChartPanel.y_offset - dailyWeatherChartPanel.y_size - getPadding(false) - 10
-            radar_y = radar_y - dailyWeatherChartPanel.y_size - getPadding(true) - 5
+            image_y = image_y - dailyWeatherChartPanel.y_size - getPadding(true) - 5
             weeklyWeatherChartPanel:update(last_json)
         end
     end
@@ -145,18 +179,30 @@ function toggleChart(button)
         if button.selected then
             button.text = 'Hide Weekly'
             showWeekly = true
-            radar_y = radar_y + weeklyWeatherChartPanel.y_size + getPadding(true)
+            image_y = image_y + weeklyWeatherChartPanel.y_size + getPadding(true)
             weeklyWeatherChartPanel:update(last_json)
         else
             button.text = 'Show Weekly' 
             showWeekly = false
-            radar_y = radar_y - weeklyWeatherChartPanel.y_size - getPadding(true) - 5
+            image_y = image_y - weeklyWeatherChartPanel.y_size - getPadding(true) - 5
             weeklyWeatherChartPanel:update(last_json)
 
         end
     end
 end
+function toggleRadarSat(button)
+    -- print(button.text)
+    --button.selected = not button.selected
 
+    if button.name == "ButtonImageToggle" then
+        showRadarSatellite = not showRadarSatellite
+        if button.text == "Show Satellite" then
+            button:set_text('Show Radar')
+        else
+            button:set_text('Show Satellite')
+        end
+    end
+end
 function toggleRadarPlay(button)
     -- print(button.text)
     button.selected = not button.selected
@@ -165,12 +211,12 @@ function toggleRadarPlay(button)
         if button.selected then
             button.text = '▶'
             button.text_x_offset = 3
-            playRadar = false
+            playImage = false
 
         else
             button.text = '▮▮'
             button.text_x_offset = 0
-            playRadar = true
+            playImage = true
 
             if buttonStop.selected then
                 toggleRadarStop(buttonStop)
@@ -185,32 +231,32 @@ function toggleRadarStop(button)
 
     if button.name == "ButtonStop" then
         if button.selected then
-            -- print("Set stopRadar to true")
+            -- print("Set stopImage to true")
             button.text = '■'
-            stopRadar = true
+            stopImage = true
             if not buttonPausePlay.selected then
                 toggleRadarPlay(buttonPausePlay)
             end
         else
             button.text = '■'
-            stopRadar = false
+            stopImage = false
         end
     end
 end
 
-function toggleRadarSpeed(button)
+function toggleimageSpeed(button)
     -- print(button.text)
 
     if button.name == "ButtonSpeed" then
         if button.text == "x0,25" then
             button.text = 'x1,0'
-            radarSpeed = 1.0
+            imageSpeed = 1.0
         elseif button.text == "x0,5" then
             button.text = 'x0,25'
-            radarSpeed = 0.25
+            imageSpeed = 0.25
         elseif button.text == "x1,0" then
             button.text = 'x0,5'
-            radarSpeed = 0.5
+            imageSpeed = 0.5
             -- print(button.text)
         end
     end
@@ -219,11 +265,11 @@ end
 function setRadarProgress(button,x,y)
     -- print(button.name)
 
-    if button.name == "ProgressBarRadar" then
+    if button.name == "progressBarImage" then
         local step = (button.x_size - 1)/(button.max_progress - 1)
         local nextIndex = math.floor(((x + (step/2) - button.x_offset))/step) + 1
         currentRadarImage = nextIndex
-        progressBarRadar.current_progress = currentRadarImage
+        progressBarImage.current_progress = currentRadarImage
         -- print(tostring(nextIndex))
         if buttonPausePlay.selected == false then
             toggleRadarPlay(buttonPausePlay)
@@ -232,9 +278,10 @@ function setRadarProgress(button,x,y)
     end
 end
 
-function init()
+function conky_startup_hook()
     print("init widget")
-
+    -- wait a few seconds, till the first weatherinfo and sat/radar images are loaded by the script
+    Utils.sleep(10.0)
     currentWeatherInfoPanel = CurrentWeatherInfoPanel:new({
         x_offset = 0,
         y_offset = 28,
@@ -258,26 +305,36 @@ function init()
     buttonDaily = Button:new({
         x_offset = 10,
         y_offset = 102,
-        x_size = 90,
+        x_size = 70,
         y_size = 20,
         draw_border = true,
         name = 'ButtonDaily',
-        text = 'Show Daily',
+        text = 'Hide Daily',
         selected = true,
         onButtonClicked = toggleChart
     })
     buttonWeekly = Button:new({
-        x_offset = 105,
+        x_offset = 85,
         y_offset = 102,
-        x_size = 90,
+        x_size = 85,
         y_size = 20,
         draw_border = true,
         name = 'ButtonWeekly',
         text = 'Show Weekly',
         onButtonClicked = toggleChart
     })
+    buttonImageToggle = Button:new({
+        x_offset = 175,
+        y_offset = 102,
+        x_size = 80,
+        y_size = 20,
+        draw_border = true,
+        name = 'ButtonImageToggle',
+        text = 'Show Satellite',
+        onButtonClicked = toggleRadarSat
+    })
     buttonStop = Button:new({
-        x_offset = 200,
+        x_offset = 260,
         y_offset = 102,
         x_size = 10,
         y_size = 20,
@@ -288,7 +345,7 @@ function init()
         onButtonClicked = toggleRadarStop
     })
     buttonPausePlay = Button:new({
-        x_offset = 215,
+        x_offset = 275,
         y_offset = 102,
         x_size = 10,
         y_size = 20,
@@ -298,12 +355,12 @@ function init()
         useSelectedAsTextColor = true,
         onButtonClicked = toggleRadarPlay
     })
-    progressBarRadar = ProgressBar:new({
-        x_offset = 232,
+    progressBarImage = ProgressBar:new({
+        x_offset = 290,
         y_offset = 102,
-        x_size = 130,
+        x_size = 75,
         y_size = 20,
-        name = 'ProgressBarRadar',
+        name = 'progressBarImage',
         onProgressBarClicked = setRadarProgress
     })
     buttonSpeed = Button:new({
@@ -312,8 +369,8 @@ function init()
         x_size = 20,
         y_size = 20,
         name = 'ButtonSpeed',
-        text = string.format("x%s",radarSpeed),
-        onButtonClicked = toggleRadarSpeed
+        text = string.format("x%s",imageSpeed),
+        onButtonClicked = toggleimageSpeed
     })
     init_done = true
 
@@ -321,6 +378,10 @@ function init()
     local waitSecAfterJSONUpdate = 25
     last_update = tonumber(Utils.read_file(os.getenv("HOME") .. "/.conky/weather-widget/last_update.txt")) + waitSecAfterJSONUpdate
     update()
+end
+
+function conky_shutdown_hook()
+    print("shutdown")
 end
 
 function update_radar_frames()
@@ -366,7 +427,55 @@ function update_radar_frames()
         end
     end
 
-    progressBarRadar.max_progress = #frames
+    progressBarImage.max_progress = #frames
+end
+
+function update_satellite_frames()
+    print("Update Satellite Frames")
+    -- Get all satellite frame files sorted by timestamp
+    local frame_files = Utils.scandir(eu_frame_dir)
+    table.sort(frame_files)  -- ensure chronological order
+    
+    -- First-time load: populate eu_frames table completely
+    if #eu_frames == 0 then
+        for i, frame_path in ipairs(frame_files) do
+            print("adding frame ",eu_frame_dir .. frame_path)
+            local image = cairo_image_surface_create_from_png(eu_frame_dir .. frame_path)
+            image.file_name = frame_path
+            table.insert(eu_frames, image)
+        end
+    else
+        -- Subsequent updates: check if new frame(s) exist
+        local last_frame_file = eu_frames[#eu_frames].file_name
+        local new_files_start_index = 1
+        
+        for i, frame_path in ipairs(frame_files) do
+            if frame_path == last_frame_file then
+                new_files_start_index = i + 1
+                break
+            end
+        end
+        
+        -- Load only new eu_frames
+        if new_files_start_index then
+            for i = new_files_start_index, #frame_files do
+                local frame_path = frame_files[i]
+                print("adding frame2 ",eu_frame_dir .. frame_path)
+                local image = cairo_image_surface_create_from_png(eu_frame_dir .. frame_path)
+                image.file_name = frame_path
+                table.insert(eu_frames, image)
+            end
+        end
+
+        -- Remove old eu_frames if we exceed the intended max count
+        while #eu_frames > #frame_files do
+            local old_frame = eu_frames[1]
+            cairo_surface_destroy(old_frame)
+            table.remove(eu_frames, 1)
+        end
+    end
+
+    progressBarImage.max_progress = #eu_frames
 end
 
 -- Update chart data from JSON file
@@ -391,6 +500,7 @@ function update()
     dailyWeatherChartPanel:update(last_json)
     weeklyWeatherChartPanel:update(last_json)
     update_radar_frames()
+    update_satellite_frames()
     currentWeatherInfoPanel:update(last_json,last_update)
 end
 
@@ -407,61 +517,70 @@ function conky_weather_widget_mouse_hook(event)
         end
         buttonDaily:updateMouseEvent(lastMouseEvent) 
         buttonWeekly:updateMouseEvent(lastMouseEvent)
+        buttonImageToggle:updateMouseEvent(lastMouseEvent)
         buttonPausePlay:updateMouseEvent(lastMouseEvent)
         buttonStop:updateMouseEvent(lastMouseEvent)
-        progressBarRadar:updateMouseEvent(lastMouseEvent)
+        progressBarImage:updateMouseEvent(lastMouseEvent)
         buttonSpeed:updateMouseEvent(lastMouseEvent)
     end
     return false
 end
 
 function conky_draw_weather_widget()
-    if conky_window == nil then return end
-    
-    local cs = cairo_xlib_surface_create(
-        conky_window.display,
-        conky_window.drawable,
-        conky_window.visual,
-        conky_window.width,
-        conky_window.height
-    )
-    local cr = cairo_create(cs)
 
-    if init_done == false then
-        init()
-    end
+    if init_done then
+        if conky_window == nil then return end
+        
+        cs = cairo_xlib_surface_create(
+            conky_window.display,
+            conky_window.drawable,
+            conky_window.visual,
+            conky_window.width,
+            conky_window.height
+        )
 
-    -- update data every 5mins
-    local current_time = os.time()
-    if current_time - last_update > 300 then
-        last_update = current_time
-        update()
-    end
+        local cr = cairo_create(cs)
 
-    if last_json == nil then
-        Utils.drawText(cr, 10,50,"Unable to fetch WeatherInfo from wttr.in!",Utils.getFont("#993737",14))
-    else
-        currentWeatherInfoPanel:draw(cr)
-        buttonDaily:draw(cr)
-        buttonWeekly:draw(cr)
-        buttonPausePlay:draw(cr)
-        buttonStop:draw(cr)
-        buttonSpeed:draw(cr)
-        if showDaily then
-            dailyWeatherChartPanel:draw(cr)
-        end
-        if showWeekly then
-            weeklyWeatherChartPanel:draw(cr)
+
+        -- update data every 5mins
+        local current_time = os.time()
+        if current_time - last_update > 310 then
+            last_update = last_update + 300
+            update()
         end
 
-        if stopRadar == false then
-            draw_radar_image(cr,10,radar_y,380,380)
-        end
-        progressBarRadar:draw(cr)
-    end
+        if last_json == nil then
+            Utils.drawText(cr, 10,50,"Unable to fetch WeatherInfo from wttr.in!",Utils.getFont("#993737",14))
+        else
+            currentWeatherInfoPanel:draw(cr)
+            buttonDaily:draw(cr)
+            buttonWeekly:draw(cr)
+            buttonImageToggle:draw(cr)
+            buttonPausePlay:draw(cr)
+            buttonStop:draw(cr)
+            buttonSpeed:draw(cr)
+            if showDaily then
+                dailyWeatherChartPanel:draw(cr)
+            end
+            if showWeekly then
+                weeklyWeatherChartPanel:draw(cr)
+            end
 
-    cairo_destroy(cr)
-    cairo_surface_destroy(cs)
+            if stopImage == false then
+                if showRadarSatellite == false then
+                    progressBarImage.max_progress = #frames
+                    draw_radar_image(cr,10,image_y,380,380)
+                else
+                    progressBarImage.max_progress = #eu_frames
+                    draw_satellite_image(cr,10,image_y,380,380)
+                end
+            end
+            progressBarImage:draw(cr)
+        end
+
+        cairo_destroy(cr)
+        cairo_surface_destroy(cs)
+    end
     
     -- collectgarbage("collect")
     -- print("Lua memory (KB):", collectgarbage("count"))

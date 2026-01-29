@@ -1,7 +1,10 @@
 gif_frames_edit/*.png
 gif_frames_raw/*.png
 gif_frames/*.png
+eu_gif_frames/*.png
+eu_gif_frames_raw/*.png
 
 weatherinfo.json
 weather.log
 last_update.txt
+last_sat_update.txt

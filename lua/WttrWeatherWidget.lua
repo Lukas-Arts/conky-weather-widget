@@ -270,9 +270,12 @@ function conky_draw_weather_widget()
         Utils.draw_scaled_image_surface(cr,getImage(os.getenv("HOME") .. "/.conky/weather-widget/icons/sun/sunset_blue1.png"),318,31,26,26)
         Utils.drawText(cr, 350,50,today.astronomy[1].sunset)
         Utils.draw_scaled_image_surface(cr,getImage(os.getenv("HOME") .. "/.conky/weather-widget/icons/arrow/cardinal-points_clean_blue.png"),226,60,38,38)
-        winddirDegreeMod=(current_condition.winddirDegree % 45)
-        winddirDegreeMod=math.floor(current_condition.winddirDegree - winddirDegreeMod)
-        Utils.draw_scaled_image_surface(cr,getImage(os.getenv("HOME") .. "/.conky/weather-widget/icons/arrow/arrow_blue2-" .. winddirDegreeMod .. ".png"),227,61,38,38)
+        local winddirDegreeMod=(current_condition.winddirDegree % 45)
+        local winddirDegree=math.floor(current_condition.winddirDegree - winddirDegreeMod)
+        if winddirDegreeMod>22 then
+            winddirDegree=(winddirDegree+45) % 360
+        end
+        Utils.draw_scaled_image_surface(cr,getImage(os.getenv("HOME") .. "/.conky/weather-widget/icons/arrow/arrow_blue2-" .. winddirDegree .. ".png"),227,61,38,38)
 
         Utils.drawText(cr, 268,75,"Wind: " .. current_condition.winddirDegree .. "°, " .. current_condition.windspeedKmph .."km/h")
         Utils.drawText(cr, 268,90,"Luftf.: " .. current_condition.humidity .. "% Druck: " .. current_condition.pressure .."hPa")

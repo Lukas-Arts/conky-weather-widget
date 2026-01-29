@@ -59,8 +59,13 @@ function CurrentWeatherInfoPanel:update(last_json, current_time)
     Utils.drawText(cr, 350,22,Utils.splitString(last_json.daily.sunset[1],"T")[2])
     Utils.draw_scaled_image_surface(cr,getImage(os.getenv("HOME") .. "/.conky/weather-widget/icons/arrow/cardinal-points_clean_blue.png"),226,32,38,38)
     local winddirDegreeMod=(current_condition.wind_direction_10m % 45)
-    winddirDegreeMod=math.floor(current_condition.wind_direction_10m - winddirDegreeMod)
-    Utils.draw_scaled_image_surface(cr,getImage(os.getenv("HOME") .. "/.conky/weather-widget/icons/arrow/arrow_blue2-" .. winddirDegreeMod .. ".png"),227,32,38,38)
+    
+    local winddirDegree=math.floor(current_condition.wind_direction_10m - winddirDegreeMod)
+    if winddirDegreeMod>22 then
+        winddirDegree=(winddirDegree+45) % 360
+    end
+    
+    Utils.draw_scaled_image_surface(cr,getImage(os.getenv("HOME") .. "/.conky/weather-widget/icons/arrow/arrow_blue2-" .. winddirDegree .. ".png"),227,32,38,38)
 
     Utils.drawText(cr, 268,47,"Wind: " .. current_condition.wind_direction_10m .. "°, " .. current_condition.wind_speed_10m .."km/h")
     Utils.drawText(cr, 268,62,"Luftf.: " .. current_condition.relative_humidity_2m .. "% Druck: " .. current_condition.surface_pressure .."hPa")
