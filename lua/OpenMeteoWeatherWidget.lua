@@ -386,95 +386,119 @@ end
 
 function update_radar_frames()
     print("Update Radar Frames")
-    -- Get all radar frame files sorted by timestamp
-    local frame_files = Utils.scandir(frame_dir)
-    table.sort(frame_files)  -- ensure chronological order
     
-    -- First-time load: populate frames table completely
-    if #frames == 0 then
-        for i, frame_path in ipairs(frame_files) do
-            local image = cairo_image_surface_create_from_png(frame_dir .. frame_path)
-            image.file_name = frame_path
-            table.insert(frames, image)
-        end
-    else
-        -- Subsequent updates: check if new frame(s) exist
-        local last_frame_file = frames[#frames].file_name
-        local new_files_start_index = nil
-        
-        for i, frame_path in ipairs(frame_files) do
-            if frame_path == last_frame_file then
-                new_files_start_index = i + 1
-                break
-            end
-        end
-        
-        -- Load only new frames
-        if new_files_start_index then
-            for i = new_files_start_index, #frame_files do
-                local frame_path = frame_files[i]
-                local image = cairo_image_surface_create_from_png(frame_dir .. frame_path)
-                image.file_name = frame_path
-                table.insert(frames, image)
-            end
-        end
+    -- 1. Get the current state of the disk
+    local disk_files = Utils.scandir(frame_dir)
+    table.sort(disk_files) 
 
-        -- Remove old frames if we exceed the intended max count
-        while #frames > #frame_files do
-            local old_frame = frames[1]
-            cairo_surface_destroy(old_frame)
-            table.remove(frames, 1)
+    -- Helper: Create a lookup table (Set) of files currently on disk
+    local disk_files_set = {}
+    for _, filename in ipairs(disk_files) do
+        disk_files_set[filename] = true
+    end
+
+    -- Helper: Create a lookup table (Set) of files already loaded in memory
+    local loaded_frames_set = {}
+    for _, image in ipairs(frames) do
+        loaded_frames_set[image.file_name] = true
+    end
+
+    -- 2. REMOVE PHASE: 
+    -- Remove frames from memory that no longer exist on disk
+    -- We iterate backwards so removing items doesn't mess up the loop index
+    for i = #frames, 1, -1 do
+        local image = frames[i]
+        if not disk_files_set[image.file_name] then
+            print("Removing obsolete frame: ", image.file_name)
+            cairo_surface_destroy(image) -- Prevent memory leaks
+            table.remove(frames, i)
         end
     end
 
+    -- 3. ADD PHASE: 
+    -- Load any file on disk that isn't currently in memory
+    for _, filename in ipairs(disk_files) do
+        if not loaded_frames_set[filename] then
+            print("Adding new frame: ", frame_dir .. filename)
+            local image = cairo_image_surface_create_from_png(frame_dir .. filename)
+            
+            -- Safety check: ensure image loaded correctly
+            if image then 
+                image.file_name = filename
+                table.insert(frames, image)
+            else
+                print("Error loading image: " .. filename)
+            end
+        end
+    end
+
+    -- 4. SORT PHASE:
+    -- Since we might have added files out of order (or if the OS returns them mixed),
+    -- re-sort the frames table based on the filename (timestamp)
+    table.sort(frames, function(a, b) 
+        return a.file_name < b.file_name 
+    end)
+
+    print("Total frames loaded: " .. #frames)
     progressBarImage.max_progress = #frames
 end
 
 function update_satellite_frames()
-    print("Update Satellite Frames")
-    -- Get all satellite frame files sorted by timestamp
-    local frame_files = Utils.scandir(eu_frame_dir)
-    table.sort(frame_files)  -- ensure chronological order
+    print("Update Radar Frames")
     
-    -- First-time load: populate eu_frames table completely
-    if #eu_frames == 0 then
-        for i, frame_path in ipairs(frame_files) do
-            print("adding frame ",eu_frame_dir .. frame_path)
-            local image = cairo_image_surface_create_from_png(eu_frame_dir .. frame_path)
-            image.file_name = frame_path
-            table.insert(eu_frames, image)
-        end
-    else
-        -- Subsequent updates: check if new frame(s) exist
-        local last_frame_file = eu_frames[#eu_frames].file_name
-        local new_files_start_index = 1
-        
-        for i, frame_path in ipairs(frame_files) do
-            if frame_path == last_frame_file then
-                new_files_start_index = i + 1
-                break
-            end
-        end
-        
-        -- Load only new eu_frames
-        if new_files_start_index then
-            for i = new_files_start_index, #frame_files do
-                local frame_path = frame_files[i]
-                print("adding frame2 ",eu_frame_dir .. frame_path)
-                local image = cairo_image_surface_create_from_png(eu_frame_dir .. frame_path)
-                image.file_name = frame_path
-                table.insert(eu_frames, image)
-            end
-        end
+    -- 1. Get the current state of the disk
+    local disk_files = Utils.scandir(eu_frame_dir)
+    table.sort(disk_files) 
 
-        -- Remove old eu_frames if we exceed the intended max count
-        while #eu_frames > #frame_files do
-            local old_frame = eu_frames[1]
-            cairo_surface_destroy(old_frame)
-            table.remove(eu_frames, 1)
+    -- Helper: Create a lookup table (Set) of files currently on disk
+    local disk_files_set = {}
+    for _, filename in ipairs(disk_files) do
+        disk_files_set[filename] = true
+    end
+
+    -- Helper: Create a lookup table (Set) of files already loaded in memory
+    local loaded_frames_set = {}
+    for _, image in ipairs(eu_frames) do
+        loaded_frames_set[image.file_name] = true
+    end
+
+    -- 2. REMOVE PHASE: 
+    -- Remove frames from memory that no longer exist on disk
+    -- We iterate backwards so removing items doesn't mess up the loop index
+    for i = #eu_frames, 1, -1 do
+        local image = eu_frames[i]
+        if not disk_files_set[image.file_name] then
+            print("Removing obsolete frame: ", image.file_name)
+            cairo_surface_destroy(image) -- Prevent memory leaks
+            table.remove(eu_frames, i)
         end
     end
 
+    -- 3. ADD PHASE: 
+    -- Load any file on disk that isn't currently in memory
+    for _, filename in ipairs(disk_files) do
+        if not loaded_frames_set[filename] then
+            print("Adding new frame: ", eu_frame_dir .. filename)
+            local image = cairo_image_surface_create_from_png(eu_frame_dir .. filename)
+            
+            -- Safety check: ensure image loaded correctly
+            if image then 
+                image.file_name = filename
+                table.insert(eu_frames, image)
+            else
+                print("Error loading image: " .. filename)
+            end
+        end
+    end
+
+    -- 4. SORT PHASE:
+    -- Since we might have added files out of order (or if the OS returns them mixed),
+    -- re-sort the frames table based on the filename (timestamp)
+    table.sort(eu_frames, function(a, b) 
+        return a.file_name < b.file_name 
+    end)
+
+    print("Total frames loaded: " .. #eu_frames)
     progressBarImage.max_progress = #eu_frames
 end
 
