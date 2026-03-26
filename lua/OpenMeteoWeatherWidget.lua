@@ -19,6 +19,7 @@ eu_frames = {}
 last_update = 0
 last_json_update = 0
 last_json = {}
+settings = {}
 currentWeatherInfoPanel = nil
 dailyWeatherChartPanel = nil
 weeklyWeatherChartPanel = nil
@@ -115,8 +116,11 @@ function draw_radar_image(cr,x,y,width,height)
         cairo_line_to(cr, x,y+142)
         cairo_stroke(cr)
         
-        local target_x = %YOUR_HOME_X% + x
-        local target_y = %YOUR_HOME_Y% + y
+        local locale image_scale_x=width/400
+        local locale image_scale_y=height/400
+
+        local target_x = tonumber(settings.detail_target_x)*image_scale_x + x
+        local target_y = tonumber(settings.detail_target_y)*image_scale_y + y
         local target2_x = 71 + x
         local target2_y = 71 + y
         -- draw target indicator at YOUR_HOME_X / YOUR_HOME_Y of the image
@@ -128,7 +132,7 @@ function draw_radar_image(cr,x,y,width,height)
         Utils.drawLine(cr,target_x+5,target_y,9,0,lineProps)
         Utils.drawLine(cr,target_x-5,target_y,-9,0,lineProps)
         
-        -- draw detail indicator at YOUR_HOME_X / YOUR_HOME_Y of the image
+        -- draw detail indicator
         local lineProps2 = Utils.getLineProps("#BB596930")
         Utils.drawBox(cr,target2_x-15,target2_y-15,29,29,lineProps2)
         
@@ -280,8 +284,11 @@ end
 
 function conky_startup_hook()
     print("init widget")
-    -- wait a few seconds, till the first weatherinfo and sat/radar images are loaded by the script
-    Utils.sleep(10.0)
+
+    -- read settings
+    settings = Utils.read_properties(os.getenv("HOME") .. "/.conky/weather-widget/settings.properties")
+    print("Settings loaded")
+    
     currentWeatherInfoPanel = CurrentWeatherInfoPanel:new({
         x_offset = 0,
         y_offset = 28,
@@ -506,19 +513,13 @@ end
 function update()
     print("Update")
 
-    local json_text = Utils.read_file(os.getenv("HOME") .. "/.conky/weather-widget/weatherinfo.json")
-    if not json_text or json_text == "" then
+    local json_obj = Utils.read_json(os.getenv("HOME") .. "/.conky/weather-widget/weatherinfo.json")
+    if not json_obj or json_obj == "" then
         print("Error: weatherinfo.json is empty or missing.")
         return
     end
-
-    local ok, obj_or_err = pcall(json.decode, json_text)
-    if not ok then
-        print("Error decoding JSON:", obj_or_err)
-        return
-    end
     
-    last_json = obj_or_err
+    last_json = json_obj
 
     last_json_update = os.date("%Y-%m-%d %H:%M", last_update)
     dailyWeatherChartPanel:update(last_json)

@@ -77,5 +77,5 @@ conky.config = {
 conky.text = [[
 ${goto 10}${color1}${font9}H${font0} Weather
 ${voffset -10}${color1}${hr 1}${font2}
-${texecpi 60 ~/.conky/weather-widget/weather.sh open-meteo LATITUDE LONGITUDE}
+${texecpi 60 ~/.conky/weather-widget/weather.sh}
 ]];

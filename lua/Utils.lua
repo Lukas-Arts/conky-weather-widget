@@ -1,6 +1,7 @@
 -- ~/.conky/weather-widget/lua/Utils.lua
 local Utils = {}
 local socket = require 'socket'
+local json  = require("json")
 Utils.__index = Utils
 
 -- wait for sec as a float
@@ -352,6 +353,35 @@ function Utils.read_file(path)
     local content = f:read("*a")
     f:close()
     return content
+end
+function Utils.read_properties(path)
+    local props = {}
+    for line in io.lines(path) do
+        -- This pattern looks for: key = "value" or key = value
+        -- It captures the key and the value, ignoring surrounding quotes
+        local key, value = line:match('^%s*([^%s=]+)%s*=%s*"?([^"]*)"?%s*$')
+        if key then
+            props[key] = value
+        end
+    end
+    return props
+end
+function Utils.read_json(path)
+
+    local json_text = Utils.read_file(path)
+    if not json_text or json_text == "" then
+        print("Error: ",path," is empty or missing.")
+        return
+    end
+
+    local ok, obj_or_err = pcall(json.decode, json_text)
+    if not ok then
+        print("Error decoding JSON:", obj_or_err)
+        return
+    end
+
+    -- return json object
+    return obj_or_err   
 end
 
 -- define a function to spring a string with give separator
