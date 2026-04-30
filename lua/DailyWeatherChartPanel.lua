@@ -115,9 +115,9 @@ function DailyWeatherChartPanel:draw_content(cr)
                         end
                         
                         if hour_then > 10 then
-                            Utils.drawText(cr, 15+cStep,chart1Start + 65,string.format("%dh",hour_then))
+                            Utils.drawText(cr, 15+cStep,chart1Start + 65,string.format("%dh",hour_then-1))
                         else
-                            Utils.drawText(cr, 18+cStep,chart1Start + 65,string.format("%dh",hour_then))
+                            Utils.drawText(cr, 18+cStep,chart1Start + 65,string.format("%dh",hour_then-1))
                         end
 
                         local imagePath = Utils.getWMOIconPath(self.last_json.minutely_15.weather_code[minutelyIndex],dayNightString .. "_t@1x-blue")
