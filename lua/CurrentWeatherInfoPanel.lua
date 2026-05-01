@@ -49,9 +49,9 @@ function CurrentWeatherInfoPanel:update(last_json, current_time)
     Utils.draw_scaled_image_surface(cr,getImage(Utils.getWMOIconPath(current_condition.weather_code,dayNightString .. "_t@2x-blue")),-5,-13,100,100)
     Utils.drawText(cr, 90,22,Utils.getDescriptionFromWMOIconCode(current_condition.weather_code),Utils.getFont("#3B5969FF",14))
     Utils.drawText(cr, 90,37,"Temp: " .. current_condition.temperature_2m .. "°C (" .. last_json.hourly.apparent_temperature[hour_now_index] .. "°C)")
-    Utils.drawText(cr, 90,52,"Wolken: " .. current_condition.cloud_cover .. "%")
+    Utils.drawText(cr, 90,52,"Clouds: " .. current_condition.cloud_cover .. "%")
     local chanceOfPrecipitation = tonumber(last_json.hourly.precipitation_probability[hour_now_index])
-    Utils.drawText(cr, 90,67,"Niederschlag: " .. chanceOfPrecipitation .. "%")
+    Utils.drawText(cr, 90,67,"Precipitation: " .. chanceOfPrecipitation .. "%")
 
     Utils.draw_scaled_image_surface(cr,getImage(os.getenv("HOME") .. "/.conky/weather-widget/icons/sun/sunrise_blue1.png"),232,4,26,26)
     Utils.drawText(cr, 268,22,Utils.splitString(last_json.daily.sunrise[1],"T")[2])
@@ -68,7 +68,7 @@ function CurrentWeatherInfoPanel:update(last_json, current_time)
     Utils.draw_scaled_image_surface(cr,getImage(os.getenv("HOME") .. "/.conky/weather-widget/icons/arrow/arrow_blue2-" .. winddirDegree .. ".png"),227,32,38,38)
 
     Utils.drawText(cr, 268,47,"Wind: " .. current_condition.wind_direction_10m .. "°, " .. current_condition.wind_speed_10m .."km/h")
-    Utils.drawText(cr, 268,62,"Luftf.: " .. current_condition.relative_humidity_2m .. "% Druck: " .. current_condition.surface_pressure .."hPa")
+    Utils.drawText(cr, 268,62,"Hum.: " .. current_condition.relative_humidity_2m .. "% Press.: " .. current_condition.surface_pressure .."hPa")
 
     cairo_destroy(cr)
 end
